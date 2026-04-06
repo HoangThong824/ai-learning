@@ -1,0 +1,36 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --color-primary-50: #eef2ff;
+  --color-primary-100: #e0e7ff;
+  --color-primary-500: #6366f1;
+  --color-primary-600: #4f46e5;
+  --color-primary-700: #4338ca;
+}
+
+@layer base {
+  body {
+    font-family: 'Quicksand', sans-serif;
+    background-color: #f8fafc; /* slate-50 */
+    background-image: radial-gradient(circle at top right, #e0e7ff 0%, #f8fafc 40%, #fdf4ff 100%);
+    color: #1e293b; /* slate-800 */
+    min-height: 100vh;
+  }
+}
+
+/* Custom scrollbar for deep dark themes */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
