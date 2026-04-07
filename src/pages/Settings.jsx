@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Key, Save, ShieldCheck, CheckCircle2, AlertCircle, Settings as SettingsIcon, Bell } from 'lucide-react';
+import { Key, Save, ShieldCheck, CheckCircle2, AlertCircle, Settings as SettingsIcon, Bell, ChevronDown } from 'lucide-react';
 import { getSettings, saveSettings } from '../persistence/storage';
 
 export default function Settings() {
@@ -26,7 +26,6 @@ export default function Settings() {
         return;
       }
 
-      // Request notification permission on save if enabled
       if (reminderEnabled && 'Notification' in window && Notification.permission === 'default') {
         Notification.requestPermission();
       }
@@ -42,160 +41,157 @@ export default function Settings() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="p-8 h-full max-w-3xl"
+      transition={{ duration: 0.3 }}
+      className="p-7 lg:p-10 min-h-full flex flex-col gap-6 max-w-2xl"
     >
-      <header className="mb-10">
-        <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
-          <SettingsIcon className="w-10 h-10 text-indigo-500" /> Cài đặt
-        </h1>
-        <p className="text-slate-500 mt-2 font-medium">Quản lý cấu hình AI và nhắc nhở học tập của bạn.</p>
+      {/* Header */}
+      <header>
+        <div className="flex items-center gap-2 mb-1.5">
+          <SettingsIcon className="w-4 h-4 text-slate-400" />
+          <span className="text-xs font-medium text-slate-500">Cấu hình</span>
+        </div>
+        <h1 className="text-2xl font-semibold text-slate-900">Cài đặt</h1>
+        <p className="text-sm text-slate-400 mt-1">Quản lý API key và tuỳ chỉnh trải nghiệm học tập</p>
       </header>
 
-      <div className="space-y-8 pb-20">
-        {/* API Settings Module */}
-        <section className="bg-white border border-slate-100 rounded-[2rem] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.06)] relative overflow-hidden">
-          <div className="absolute -right-10 -top-10 text-indigo-500/5 pointer-events-none">
-            <ShieldCheck className="w-64 h-64" />
-          </div>
-
-          <div className="relative z-10">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center shadow-md">
-                <Key className="w-7 h-7 text-white" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-slate-800">Cấu hình AI</h2>
-                <p className="text-sm text-slate-500 mt-0.5">Kết nối với OpenAI hoặc Anthropic Claude để kích hoạt AI</p>
-              </div>
+      <div className="space-y-5 pb-10">
+        {/* AI Config */}
+        <section className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+          <div className="px-6 py-5 border-b border-slate-50 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+              <Key className="w-4 h-4 text-blue-500" />
             </div>
-
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-bold text-slate-600 mb-2">Nhà cung cấp AI</label>
-                <div className="relative">
-                  <select
-                    value={aiProvider}
-                    onChange={(e) => setAiProvider(e.target.value)}
-                    className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-4 text-slate-800 appearance-none focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 transition-all cursor-pointer font-semibold"
-                  >
-                    <option value="openai">OpenAI (GPT-4o mini)</option>
-                    <option value="anthropic">Anthropic (Claude 3.5 Sonnet)</option>
-                  </select>
-                  <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-slate-600 mb-2">API Key</label>
-                <input
-                  type="password"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  placeholder={aiProvider === 'anthropic' ? 'sk-ant-...' : 'sk-...'}
-                  className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-4 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 transition-all font-mono tracking-wider"
-                />
-                <p className="text-xs text-slate-400 mt-3 flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-                  API key được lưu trong browser và không gửi đến bất kỳ server nào ngoài nhà cung cấp AI.
-                </p>
-              </div>
+            <div>
+              <h2 className="text-sm font-semibold text-slate-800">Cấu hình AI</h2>
+              <p className="text-xs text-slate-400">Kết nối với OpenAI hoặc Anthropic Claude</p>
             </div>
           </div>
-        </section>
 
-        {/* Reminder Settings Module */}
-        <section className="bg-white border border-slate-100 rounded-[2rem] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.06)] relative overflow-hidden">
-          <div className="absolute -right-10 -top-10 text-emerald-500/5 pointer-events-none">
-            <Bell className="w-64 h-64" />
-          </div>
-
-          <div className="relative z-10">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-md">
-                <Bell className="w-7 h-7 text-white" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-slate-800">Cài đặt Nhắc nhở</h2>
-                <p className="text-sm text-slate-500 mt-0.5">Quản lý các thông báo nhắc nhở học tập hàng ngày</p>
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
-                <div>
-                  <h3 className="font-bold text-slate-800">Bật nhắc nhở học tập</h3>
-                  <p className="text-xs text-slate-500">Hệ thống sẽ gửi thông báo mỗi ngày để nhắc bạn học tập</p>
-                </div>
-                <button
-                  onClick={() => setReminderEnabled(!reminderEnabled)}
-                  className={`w-14 h-8 rounded-full transition-all duration-300 relative ${reminderEnabled ? 'bg-indigo-500' : 'bg-slate-300'}`}
+          <div className="px-6 py-5 space-y-5">
+            {/* Provider select */}
+            <div>
+              <label className="block text-xs font-medium text-slate-600 mb-2">Nhà cung cấp</label>
+              <div className="relative">
+                <select
+                  value={aiProvider}
+                  onChange={(e) => setAiProvider(e.target.value)}
+                  className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 focus:outline-none focus:border-slate-300 focus:bg-white transition-colors cursor-pointer"
                 >
-                  <motion.div
-                    animate={{ x: reminderEnabled ? 24 : 4 }}
-                    className="absolute top-1 left-0 w-6 h-6 rounded-full bg-white shadow-sm"
-                  />
-                </button>
+                  <option value="openai">OpenAI — GPT-4o mini</option>
+                  <option value="anthropic">Anthropic — Claude 3.5 Sonnet</option>
+                </select>
+                <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
               </div>
+            </div>
 
-              <AnimatePresence>
-                {reminderEnabled && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="p-4 pt-0">
-                      <label className="block text-sm font-bold text-slate-600 mb-2">Giờ nhắc nhở hàng ngày</label>
-                      <input
-                        type="time"
-                        value={reminderTime}
-                        onChange={(e) => setReminderTime(e.target.value)}
-                        className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 transition-all font-semibold"
-                      />
-                      <p className="text-xs text-slate-400 mt-3 flex items-center gap-1.5">
-                        <AlertCircle className="w-3.5 h-3.5" />
-                        Chúng tôi khuyên bạn nên chọn khung giờ buổi tối để dễ duy trì thói quen học tập.
-                      </p>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+            {/* API Key */}
+            <div>
+              <label className="block text-xs font-medium text-slate-600 mb-2">API Key</label>
+              <input
+                type="password"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                placeholder={aiProvider === 'anthropic' ? 'sk-ant-...' : 'sk-...'}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-300 focus:bg-white transition-colors font-mono"
+              />
+              <p className="text-xs text-slate-400 mt-2 flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                Key được lưu cục bộ trong trình duyệt, không gửi đến server.
+              </p>
             </div>
           </div>
         </section>
 
-        {/* Action Button (Global) */}
-        <div className="flex items-center justify-between p-6 bg-white/50 backdrop-blur-md border border-white rounded-[2rem] shadow-lg">
-          <AnimatePresence>
-            {saveStatus === 'success' && (
-              <motion.div
-                initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}
-                className="flex items-center gap-2 text-emerald-600 font-semibold"
+        {/* Reminder config */}
+        <section className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+          <div className="px-6 py-5 border-b border-slate-50 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center">
+              <Bell className="w-4 h-4 text-orange-500" />
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold text-slate-800">Nhắc nhở học tập</h2>
+              <p className="text-xs text-slate-400">Nhận thông báo để duy trì chuỗi học đều đặn</p>
+            </div>
+          </div>
+
+          <div className="px-6 py-5 space-y-4">
+            {/* Toggle */}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-slate-700">Bật nhắc nhở</p>
+                <p className="text-xs text-slate-400 mt-0.5">Gửi thông báo đẩy khi đến giờ học</p>
+              </div>
+              <button
+                onClick={() => setReminderEnabled(!reminderEnabled)}
+                className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${reminderEnabled ? 'bg-orange-500' : 'bg-slate-200'}`}
               >
-                <CheckCircle2 className="w-5 h-5" /> Đã lưu thành công!
-              </motion.div>
-            )}
-            {saveStatus === 'error' && (
-              <motion.div
-                initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}
-                className="flex items-center gap-2 text-rose-500 font-semibold"
-              >
-                <AlertCircle className="w-5 h-5" /> API Key không được để trống!
-              </motion.div>
-            )}
-            {!saveStatus && <div />}
-          </AnimatePresence>
+                <motion.div
+                  animate={{ x: reminderEnabled ? 22 : 2 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                  className="absolute top-1 w-4 h-4 rounded-full bg-white shadow"
+                />
+              </button>
+            </div>
+
+            {/* Time picker */}
+            <AnimatePresence>
+              {reminderEnabled && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="overflow-hidden"
+                >
+                  <label className="block text-xs font-medium text-slate-600 mb-2">Thời gian thông báo</label>
+                  <input
+                    type="time"
+                    value={reminderTime}
+                    onChange={(e) => setReminderTime(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 focus:outline-none focus:border-slate-300 focus:bg-white transition-colors"
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </section>
+
+        {/* Save row */}
+        <div className="flex items-center justify-between gap-4">
+          <div className="min-h-[20px]">
+            <AnimatePresence mode="wait">
+              {saveStatus === 'success' && (
+                <motion.p
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="flex items-center gap-1.5 text-sm text-emerald-600"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  Đã lưu thành công
+                </motion.p>
+              )}
+              {saveStatus === 'error' && (
+                <motion.p
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="flex items-center gap-1.5 text-sm text-red-500"
+                >
+                  <AlertCircle className="w-4 h-4" />
+                  Vui lòng nhập API Key
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </div>
 
           <button
             onClick={handleSave}
-            className="px-12 py-4 rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 text-white font-black text-lg shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center gap-3"
+            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors"
           >
-            <Save className="w-6 h-6" /> Lưu tất cả thay đổi
+            <Save className="w-4 h-4" />
+            Lưu thay đổi
           </button>
         </div>
       </div>

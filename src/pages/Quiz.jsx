@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  BrainCircuit, CheckCircle2, XCircle, ArrowRight, 
+  CheckCircle2, XCircle, ArrowRight, 
   RotateCcw, Trophy, Timer, AlertCircle, ArrowLeft, 
-  Sparkles, Loader2, Rocket, Target, PartyPopper, Lightbulb,
-  LayoutDashboard, FileText, BookOpen, Settings as SettingsIcon, Sprout
+  Loader2, Rocket, Target, PartyPopper, Lightbulb,
+  LayoutDashboard, FileText, BookOpen, GraduationCap
 } from 'lucide-react';
 import { getDocument } from '../persistence/db';
 import { getQuizzes, saveQuizResult, trackActivity, getLessonOutlines, getUserProgress, updateUserProgress } from '../persistence/storage';
@@ -172,9 +172,9 @@ export default function Quiz() {
   /* ---------- Loading ---------- */
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 h-full gap-4">
-        <BrainCircuit className="w-12 h-12 text-indigo-500 animate-pulse" />
-        <p className="text-slate-500 font-bold animate-pulse">Đang chuẩn bị câu hỏi...</p>
+      <div className="flex flex-col items-center justify-center p-8 h-full gap-4 bg-slate-50">
+        <Loader2 className="w-10 h-10 text-orange-500 animate-spin" />
+        <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Đang chuẩn bị câu hỏi...</p>
       </div>
     );
   }
@@ -188,7 +188,7 @@ export default function Quiz() {
         </div>
         <h2 className="text-2xl font-bold text-slate-700 mb-2">Chưa có Quiz cho tài liệu này</h2>
         <p className="text-slate-500 mb-6 max-w-sm">Hãy quay lại mục Bài học và nhấn "Tạo bài học AI" để hệ thống tự động tạo Quiz cho bạn nhé!</p>
-        <button onClick={() => navigate(`/lesson/${docId}`)} className="px-8 py-3 rounded-full bg-indigo-500 text-white font-bold shadow-md hover:bg-indigo-600 transition-all">
+        <button onClick={() => navigate(`/lesson/${docId}`)} className="px-8 py-3 rounded-full bg-orange-500 text-white font-bold shadow-md hover:bg-orange-600 transition-all">
           Quay lại Bài học
         </button>
       </div>
@@ -198,24 +198,24 @@ export default function Quiz() {
   /* ---------- Start Screen ---------- */
   if (quizState === 'start') {
     return (
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="p-8 h-full flex items-center justify-center">
-        <div className="max-w-xl w-full bg-white border border-slate-100 rounded-[3rem] p-10 text-center shadow-[0_20px_60px_rgba(0,0,0,0.05)] relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" />
-          <div className="w-24 h-24 rounded-3xl bg-indigo-50 flex items-center justify-center mx-auto mb-8 shadow-inner">
-            <BrainCircuit className="w-12 h-12 text-indigo-500" />
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-8 h-screen overflow-y-auto bg-slate-50 flex items-center justify-center">
+        <div className="max-w-xl w-full bg-white border border-slate-200 rounded-2xl p-10 text-center shadow-sm relative overflow-hidden">
+          <div className="w-20 h-20 rounded-2xl bg-orange-50 flex items-center justify-center mx-auto mb-8 border border-orange-100">
+            <Target className="w-10 h-10 text-orange-500" />
           </div>
-          <h1 className="text-3xl font-black text-slate-800 mb-4 tracking-tight">Sẵn sàng thử thách? <Target className="inline-block w-8 h-8 text-rose-500" /></h1>
-          <p className="text-slate-500 text-lg font-medium mb-10">
-            Bạn sẽ thực hiện bộ câu hỏi gồm <strong>{questions.length} câu</strong> dựa trên bài học <strong>{doc?.filename}</strong>.
+          <h1 className="text-3xl font-black text-slate-900 mb-4 tracking-tight uppercase">Sẵn sàng thử thách?</h1>
+          <p className="text-slate-500 text-base font-bold mb-10 leading-relaxed uppercase tracking-widest text-[11px]">
+            Bộ câu hỏi gồm <strong className="text-orange-600">{questions.length} câu</strong> dựa trên: <br/>
+            <span className="text-slate-800 normal-case text-lg mt-1 block">{doc?.filename}</span>
           </p>
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3">
             <button 
               onClick={handleStart}
-              className="w-full py-5 rounded-2xl bg-slate-900 text-white font-black text-xl shadow-xl hover:shadow-indigo-500/20 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-3"
+              className="w-full py-5 rounded-xl bg-slate-900 text-white font-black text-sm uppercase tracking-[0.2em] shadow-sm hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
             >
-              Bắt đầu ngay <Rocket className="w-6 h-6" />
+              Bắt đầu ngay <Rocket className="w-5 h-5" />
             </button>
-            <button onClick={() => navigate(-1)} className="text-slate-400 font-bold hover:text-slate-600 transition-colors">
+            <button onClick={() => navigate(-1)} className="py-3 text-slate-400 font-black text-[10px] uppercase tracking-widest hover:text-slate-600 transition-colors">
               Quay lại
             </button>
           </div>
@@ -230,74 +230,66 @@ export default function Quiz() {
   if (quizState === 'finished') {
     const percent = Math.round((score / questions.length) * 100);
     return (
-      <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="p-8 h-full flex items-center justify-center">
-        <div className="max-w-xl w-full bg-white border border-slate-100 rounded-[3rem] p-12 text-center shadow-[0_20px_60px_rgba(0,0,0,0.05)] relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-400 to-teal-500" />
-          <div className="w-28 h-28 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-8 shadow-inner relative">
-             <Trophy className="w-14 h-14 text-emerald-500" />
-             <motion.div 
-               animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.2, 0.5] }}
-               transition={{ duration: 2, repeat: Infinity }}
-               className="absolute inset-0 bg-emerald-400 rounded-full blur-xl -z-10" 
-             />
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-8 h-screen overflow-y-auto bg-slate-50 flex items-center justify-center">
+        <div className="max-w-xl w-full bg-white border border-slate-200 rounded-2xl p-12 text-center shadow-sm relative overflow-hidden">
+          <div className="w-24 h-24 rounded-full bg-orange-50 flex items-center justify-center mx-auto mb-8 border border-orange-100">
+             <Trophy className="w-12 h-12 text-orange-500" />
           </div>
-          <h2 className="text-4xl font-black text-slate-800 mb-2 tracking-tighter flex items-center justify-center gap-3">
-            Tuyệt vời! <PartyPopper className="w-10 h-10 text-amber-500" />
+          <h2 className="text-3xl font-black text-slate-900 mb-2 tracking-tight uppercase">
+            Hoàn thành bài tập!
           </h2>
-          <p className="text-slate-500 text-lg font-medium mb-10">Bạn đã hoàn thành bài kiểm tra suất sắc.</p>
+          <p className="text-slate-500 text-sm font-bold mb-10 uppercase tracking-widest">Kết quả nỗ lực của bạn</p>
           
-          <div className="grid grid-cols-2 gap-6 mb-12">
-            <div className="p-6 rounded-3xl bg-slate-50 border border-slate-100">
-              <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Điểm số</p>
-              <p className="text-4xl font-black text-indigo-600 tracking-tight">{score}/{questions.length}</p>
+          <div className="grid grid-cols-2 gap-4 mb-10">
+            <div className="p-5 rounded-xl bg-slate-50 border border-slate-200">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Điểm số</p>
+              <p className="text-3xl font-black text-orange-600 tracking-tight">{score}/{questions.length}</p>
             </div>
-            <div className="p-6 rounded-3xl bg-slate-50 border border-slate-100">
-              <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Tỉ lệ đúng</p>
-              <p className="text-4xl font-black text-emerald-500 tracking-tight">{percent}%</p>
+            <div className="p-5 rounded-xl bg-slate-50 border border-slate-200">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Tỉ lệ đúng</p>
+              <p className="text-3xl font-black text-emerald-600 tracking-tight">{percent}%</p>
             </div>
           </div>
 
           {/* AI Feedback Section */}
-          <div className="mb-12 text-left">
-            <h3 className="text-xl font-black text-slate-800 mb-4 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-indigo-500" /> Nhận xét từ giáo viên AI
+          <div className="mb-10 text-left">
+            <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+              <Target className="w-4 h-4 text-orange-500" /> Nhận xét từ Roboki
             </h3>
-            <div className="p-6 lg:p-8 rounded-[2rem] bg-indigo-50/50 border border-indigo-100 relative overflow-hidden min-h-[100px]">
+            <div className="p-6 rounded-xl bg-orange-50 border border-orange-100 min-h-[80px]">
               {isLoadingFeedback ? (
                 <div className="flex flex-col items-center justify-center py-4 gap-3">
-                  <Loader2 className="w-6 h-6 text-indigo-500 animate-spin" />
-                  <p className="text-xs font-bold text-indigo-400 uppercase tracking-widest">Đang phân tích kết quả...</p>
+                  <Loader2 className="w-5 h-5 text-orange-500 animate-spin" />
+                  <p className="text-[9px] font-black text-orange-400 uppercase tracking-widest">Đang phân tích kết quả...</p>
                 </div>
               ) : (
-                <div className="prose prose-sm prose-indigo max-w-none text-slate-600 font-medium leading-relaxed">
+                <div className="prose prose-sm prose-orange max-w-none text-slate-700 font-medium leading-relaxed">
                   <ReactMarkdown>{feedback}</ReactMarkdown>
                 </div>
               )}
             </div>
             {extraQuestions.length > 0 && (
-              <motion.button
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
+              <button
                 onClick={handleStartRemedial}
-                className="mt-6 w-full py-4 rounded-2xl bg-indigo-500 text-white font-black text-lg shadow-lg shadow-indigo-500/10 flex items-center justify-center gap-3 hover:bg-indigo-600 transition-all"
+                className="mt-4 w-full py-4 rounded-xl bg-orange-500 text-white font-black text-sm uppercase tracking-widest shadow-sm hover:bg-orange-600 transition-all flex items-center justify-center gap-2"
               >
-                <BrainCircuit className="w-6 h-6" /> Làm Quiz bổ sung ngay <Sparkles className="w-5 h-5 text-amber-300" />
-              </motion.button>
+                <GraduationCap className="w-5 h-5" /> Thử thách bổ sung
+              </button>
             )}
           </div>
 
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3">
             <button 
               onClick={() => navigate('/documents')}
-              className="w-full py-5 rounded-2xl bg-slate-900 text-white font-black text-lg shadow-xl hover:shadow-indigo-500/20 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2"
+              className="w-full py-4 rounded-xl bg-slate-900 text-white font-black text-sm uppercase tracking-widest shadow-sm hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
             >
-              <LayoutDashboard className="w-5 h-5" /> Về trang chủ
+              <LayoutDashboard className="w-4 h-4" /> Về trang chủ
             </button>
             <button 
               onClick={handleRestart}
-              className="flex items-center justify-center gap-2 py-4 text-slate-400 font-bold hover:text-indigo-600 transition-colors"
+              className="py-3 text-slate-400 font-black text-[10px] uppercase tracking-widest hover:text-orange-600 transition-colors flex items-center justify-center gap-2"
             >
-              <RotateCcw className="w-4 h-4" /> Làm lại Quiz
+              <RotateCcw className="w-3.5 h-3.5" /> Làm lại Quiz
             </button>
           </div>
         </div>
@@ -313,87 +305,84 @@ export default function Quiz() {
   const progress = ((currentIdx + 1) / questions.length) * 100;
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-6 lg:p-10 h-full flex flex-col items-center">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-6 lg:p-10 h-screen overflow-y-auto bg-slate-50 flex flex-col items-center">
       <div className="w-full max-w-4xl flex-1 flex flex-col">
         {/* Header/Info */}
         <div className="flex items-center justify-between mb-8 px-4">
-          <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-slate-400 hover:text-slate-600 font-bold transition-colors">
-            <ArrowLeft className="w-5 h-5" /> Nghỉ ngơi Tạm dừng
+          <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-slate-400 hover:text-orange-600 font-black text-[10px] uppercase tracking-widest transition-colors">
+            <ArrowLeft className="w-3.5 h-3.5" /> Tạm dừng
           </button>
           <div className="flex items-center gap-10">
             <div className="text-right">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">
                 {isRemedialMode ? 'KỲ THI BỔ SUNG' : 'Tiến trình'}
               </p>
-              <p className="text-xl font-black text-slate-800 tracking-tight">{currentIdx + 1}<span className="text-slate-300 mx-1">/</span>{questions.length}</p>
+              <p className="text-xl font-black text-slate-800 tracking-tight leading-none">{currentIdx + 1}<span className="text-slate-300 mx-1">/</span>{questions.length}</p>
             </div>
             <div className="text-right">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Đúng</p>
-              <p className="text-xl font-black text-emerald-500 tracking-tight">{score}</p>
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Đúng</p>
+              <p className="text-xl font-black text-emerald-600 tracking-tight leading-none">{score}</p>
             </div>
           </div>
         </div>
 
         {/* Progress Bar */}
-        <div className="h-2 w-full bg-slate-100 rounded-full mb-12 overflow-hidden shadow-inner p-0.5">
+        <div className="h-1.5 w-full bg-slate-200 rounded-full mb-12 overflow-hidden">
           <motion.div 
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
-            className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 shadow-[0_0_10px_rgba(99,102,241,0.4)]" 
+            className="h-full bg-orange-500" 
           />
         </div>
 
         {/* Question Card */}
-        <div className="flex-1 flex flex-col lg:flex-row gap-10 items-start">
+        <div className="flex-1 flex flex-col lg:flex-row gap-10 items-start pb-20">
           <div className="flex-1 w-full">
             <AnimatePresence mode="wait">
               <motion.div 
                 key={currentIdx}
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -50 }}
-                transition={{ type: "spring", damping: 25, stiffness: 120 }}
-                className="bg-white border border-slate-100 rounded-[3rem] p-10 lg:p-14 shadow-[0_30px_60px_rgba(0,0,0,0.04)] relative"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="bg-white border border-slate-200 rounded-2xl p-8 lg:p-12 shadow-sm relative"
               >
-                <div className="absolute -top-10 -left-10 w-20 h-20 rounded-3xl bg-indigo-500/10 flex items-center justify-center -rotate-12">
-                   <Timer className="w-10 h-10 text-indigo-500" />
+                <div className="mb-8">
+                  <span className="text-[10px] font-black text-orange-600 uppercase tracking-[0.2em] px-2 py-1 bg-orange-50 rounded border border-orange-100">Câu hỏi {currentIdx + 1}</span>
                 </div>
 
-                <h2 className="text-2xl lg:text-3xl font-black text-slate-800 mb-10 leading-snug tracking-tight">
+                <h2 className="text-xl lg:text-2xl font-black text-slate-900 mb-10 leading-tight tracking-tight">
                   {q.question}
                 </h2>
 
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {q.options.map((opt, idx) => {
                     const isCorrect = idx === q.correct;
                     const isSelected = selectedOpt === idx;
                     const showResult = isConfirmed;
 
-                    let btnClass = "border-slate-100 bg-slate-50/50 hover:bg-white hover:border-slate-200 text-slate-600";
-                    if (isSelected && !showResult) btnClass = "border-indigo-500 bg-indigo-50 text-indigo-800 ring-4 ring-indigo-500/10";
-                    if (showResult && isCorrect) btnClass = "border-emerald-500 bg-emerald-50 text-emerald-800 ring-4 ring-emerald-500/10";
-                    if (showResult && isSelected && !isCorrect) btnClass = "border-rose-500 bg-rose-50 text-rose-800 ring-4 ring-rose-500/10";
+                    let btnClass = "border-slate-100 bg-slate-50 hover:bg-white hover:border-orange-200 text-slate-600";
+                    if (isSelected && !showResult) btnClass = "border-orange-500 bg-orange-50 text-orange-800";
+                    if (showResult && isCorrect) btnClass = "border-emerald-500 bg-emerald-50 text-emerald-800 font-black";
+                    if (showResult && isSelected && !isCorrect) btnClass = "border-rose-500 bg-rose-50 text-rose-800";
 
                     return (
-                      <motion.button
+                      <button
                         key={idx}
-                        whileHover={!showResult ? { scale: 1.02 } : {}}
-                        whileTap={!showResult ? { scale: 0.98 } : {}}
                         onClick={() => handleSelect(idx)}
                         disabled={showResult}
-                        className={`w-full text-left p-6 lg:p-7 rounded-3xl border-2 transition-all font-bold text-lg flex items-center justify-between group ${btnClass}`}
+                        className={`w-full text-left p-5 rounded-xl border transition-all font-bold text-base flex items-center justify-between group ${btnClass}`}
                       >
                         <div className="flex items-center gap-4">
-                          <span className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm transition-all ${
-                            isSelected ? 'bg-indigo-500 text-white' : 'bg-slate-200 text-slate-500 group-hover:bg-indigo-100 group-hover:text-indigo-600'
+                          <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs transition-all ${
+                            isSelected ? 'bg-orange-500 text-white' : 'bg-slate-200 text-slate-500 group-hover:bg-orange-100 group-hover:text-orange-600'
                           }`}>
                             {String.fromCharCode(65 + idx)}
                           </span>
                           <span className="flex-1">{opt}</span>
                         </div>
-                        {showResult && isCorrect && <CheckCircle2 className="w-7 h-7 text-emerald-500" />}
-                        {showResult && isSelected && !isCorrect && <XCircle className="w-7 h-7 text-rose-500" />}
-                      </motion.button>
+                        {showResult && isCorrect && <CheckCircle2 className="w-6 h-6 text-emerald-500" />}
+                        {showResult && isSelected && !isCorrect && <XCircle className="w-6 h-6 text-rose-500" />}
+                      </button>
                     );
                   })}
                 </div>
@@ -404,16 +393,16 @@ export default function Quiz() {
                     <motion.div 
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
-                      className="mt-10 p-6 rounded-3xl bg-slate-50 border border-slate-100"
+                      className="mt-8 p-6 rounded-xl bg-slate-50 border border-slate-200"
                     >
-                      <h4 className="font-black text-xs uppercase tracking-widest mb-2 flex items-center gap-2">
+                      <h4 className="font-black text-[10px] uppercase tracking-widest mb-2 flex items-center gap-2">
                         {selectedOpt === q.correct ? (
-                          <span className="text-emerald-500 flex items-center gap-2">Chính xác! <Sparkles className="w-4 h-4" /></span>
+                          <span className="text-emerald-600 flex items-center gap-2">Chính xác! </span>
                         ) : (
-                          <span className="text-rose-500 flex items-center gap-2">Chưa đúng rồi <Lightbulb className="w-4 h-4" /></span>
+                          <span className="text-rose-500 flex items-center gap-2">Chưa đúng rồi</span>
                         )}
                       </h4>
-                      <p className="text-slate-500 font-medium leading-relaxed mb-4">{q.explanation}</p>
+                      <p className="text-slate-600 font-medium leading-relaxed mb-4 text-sm">{q.explanation}</p>
                       {selectedOpt !== q.correct && (
                         <button
                           onClick={() => {
@@ -428,9 +417,8 @@ export default function Quiz() {
                               }
                             }));
                           }}
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-100 text-indigo-600 font-bold text-sm hover:bg-indigo-200 transition-colors"
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-orange-100 text-orange-600 font-black text-[10px] uppercase tracking-widest hover:bg-orange-200 transition-colors"
                         >
-                          <BrainCircuit className="w-4 h-4" />
                           Hỏi Gia sư giải thích thêm
                         </button>
                       )}
@@ -442,32 +430,30 @@ export default function Quiz() {
           </div>
 
           {/* Action Pane */}
-          <div className="w-full lg:w-48 flex flex-col gap-4 mt-6 lg:mt-0">
+          <div className="w-full lg:w-48 flex flex-col gap-3 mt-6 lg:mt-0">
              {!isConfirmed ? (
                <button 
                  onClick={handleConfirm}
                  disabled={selectedOpt === null}
-                 className={`w-full py-6 rounded-3xl font-black text-lg transition-all shadow-xl flex flex-col items-center justify-center gap-2 ${
+                 className={`w-full py-5 rounded-xl font-black text-sm uppercase tracking-widest transition-all shadow-sm flex items-center justify-center gap-2 ${
                    selectedOpt === null 
-                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none' 
-                    : 'bg-indigo-500 text-white hover:bg-indigo-600 shadow-indigo-500/20'
+                    ? 'bg-slate-200 text-slate-400 cursor-not-allowed' 
+                    : 'bg-orange-500 text-white hover:bg-orange-600 shadow-sm'
                  }`}
                >
                  Xác nhận 🎯
                </button>
              ) : (
-               <motion.button 
-                 initial={{ scale: 0.9, opacity: 0 }}
-                 animate={{ scale: 1, opacity: 1 }}
+               <button 
                  onClick={handleNext}
-                 className="w-full py-6 rounded-3xl bg-slate-900 text-white font-black text-lg shadow-xl hover:shadow-indigo-500/20 transition-all flex flex-col items-center justify-center gap-2 group"
+                 className="w-full py-5 rounded-xl bg-slate-900 text-white font-black text-sm uppercase tracking-widest shadow-sm hover:bg-slate-800 transition-all flex items-center justify-center gap-2 group"
                >
                  {currentIdx < questions.length - 1 ? (
-                   <>Câu tiếp theo <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" /></>
+                   <>Tiếp tục <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" /></>
                  ) : (
-                   <>Xem kết quả <PartyPopper className="w-6 h-6" /></>
+                   <>Kết quả <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" /></>
                  )}
-               </motion.button>
+               </button>
              )}
           </div>
         </div>

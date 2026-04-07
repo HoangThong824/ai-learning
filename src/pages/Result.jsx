@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Target, Trophy, ArrowRight, RotateCcw, PartyPopper, 
-  Sparkles, BrainCircuit, Rocket, ChevronLeft, Calendar,
-  CheckCircle2, AlertCircle, Loader2
+import { motion } from 'framer-motion';
+import {
+  Target, Trophy, ArrowRight, RotateCcw,
+  Calendar, CheckCircle2, AlertCircle, Loader2, ChevronLeft,
+  BookOpen
 } from 'lucide-react';
 import { getDocument } from '../persistence/db';
 import { getQuizResults } from '../persistence/storage';
@@ -20,7 +20,6 @@ export default function Result() {
   const [result, setResult] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // We can passed state from Quiz.jsx or fetch from storage
   const passedResult = location.state?.result;
   const passedFeedback = location.state?.feedback;
 
@@ -33,7 +32,6 @@ export default function Result() {
         if (passedResult) {
           setResult({ ...passedResult, feedback: passedFeedback });
         } else {
-          // Fetch last result from storage for this doc
           const allResults = getQuizResults();
           const docResults = allResults.filter(r => r.documentId === docId);
           if (docResults.length > 0) {
@@ -41,7 +39,7 @@ export default function Result() {
           }
         }
       } catch (err) {
-        console.error("Error loading result:", err);
+        console.error('Error loading result:', err);
       } finally {
         setIsLoading(false);
       }
@@ -51,21 +49,26 @@ export default function Result() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-4">
-        <Loader2 className="w-12 h-12 text-indigo-500 animate-spin" />
-        <p className="text-slate-500 font-bold">Đang tải kết quả...</p>
+      <div className="flex flex-col items-center justify-center h-full gap-3 min-h-screen">
+        <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+        <p className="text-sm text-slate-400">Đang tải kết quả…</p>
       </div>
     );
   }
 
   if (!result) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-center p-8">
-        <AlertCircle className="w-16 h-16 text-rose-300 mb-6" />
-        <h2 className="text-2xl font-black text-slate-700 mb-4">Không tìm thấy kết quả</h2>
-        <p className="text-slate-500 mb-8 max-w-sm">Có vẻ như bạn chưa thực hiện bài Quiz nào cho tài liệu này.</p>
-        <button onClick={() => navigate('/quizzes')} className="px-8 py-3 rounded-2xl bg-indigo-500 text-white font-bold">
-           Đến trang Quiz
+      <div className="flex flex-col items-center justify-center h-full text-center p-8 min-h-screen">
+        <div className="w-14 h-14 bg-white border border-slate-200 rounded-2xl flex items-center justify-center mb-5">
+          <AlertCircle className="w-7 h-7 text-slate-300" />
+        </div>
+        <h2 className="text-lg font-semibold text-slate-800 mb-2">Không tìm thấy kết quả</h2>
+        <p className="text-sm text-slate-400 mb-6 max-w-xs">Có vẻ như bạn chưa làm quiz nào cho tài liệu này.</p>
+        <button
+          onClick={() => navigate('/quizzes')}
+          className="px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors"
+        >
+          Đến trang Quiz
         </button>
       </div>
     );
@@ -74,124 +77,141 @@ export default function Result() {
   const percent = Math.round((result.score / result.total) * 100);
   const isGood = percent >= 70;
 
+  const scoreColor = isGood ? 'text-emerald-600' : 'text-rose-500';
+  const scoreBg = isGood ? 'bg-emerald-500' : 'bg-rose-500';
+
+  const advice =
+    percent >= 90
+      ? 'Xuất sắc! Bạn đã nắm vững hoàn toàn phần kiến thức này rồi.'
+      : percent >= 70
+      ? 'Kết quả tốt. Ôn thêm một lần nữa để củng cố chắc hơn nhé!'
+      : 'Đừng nản! Xem lại bài học và thử lại — bạn sẽ làm được.';
+
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="p-8 lg:p-12 h-full flex flex-col gap-10 max-w-5xl mx-auto overflow-y-auto custom-scrollbar"
+      transition={{ duration: 0.3 }}
+      className="p-7 lg:p-10 min-h-full flex flex-col gap-7 max-w-5xl mx-auto"
     >
+      {/* Top nav */}
       <header className="flex items-center justify-between">
-        <button 
+        <button
           onClick={() => navigate('/history')}
-          className="flex items-center gap-2 text-slate-400 hover:text-slate-600 font-bold transition-colors group"
+          className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-700 transition-colors"
         >
-          <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" /> Quay lại Lịch sử
+          <ChevronLeft className="w-4 h-4" />
+          Lịch sử
         </button>
-        <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-           <Calendar className="w-3.5 h-3.5" />
-           {new Date(result.timestamp).toLocaleDateString('vi-VN')}
-        </div>
+        <span className="text-xs text-slate-400 flex items-center gap-1.5">
+          <Calendar className="w-3.5 h-3.5" />
+          {new Date(result.timestamp).toLocaleDateString('vi-VN')}
+        </span>
       </header>
 
-      <div className="flex flex-col items-center text-center">
-        <motion.div 
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ type: "spring", stiffness: 200, damping: 20 }}
-          className={`inline-flex items-center justify-center w-32 h-32 rounded-[2.5rem] bg-gradient-to-br mb-8 shadow-2xl relative ${
-            isGood ? 'from-amber-300 via-orange-400 to-red-400' : 'from-slate-300 via-slate-400 to-slate-500'
-          }`}
-        >
-          <Trophy className="w-16 h-16 text-white drop-shadow-lg" />
-          {isGood && (
-            <motion.div 
-              animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="absolute inset-0 bg-amber-400 rounded-full blur-2xl -z-10" 
-            />
+      {/* Hero score */}
+      <div className="bg-white rounded-2xl border border-slate-100 p-8 flex flex-col md:flex-row items-center gap-8">
+        {/* Big score circle */}
+        <div className="flex-shrink-0 flex flex-col items-center">
+          <div className={`relative w-28 h-28 rounded-full ${isGood ? 'bg-emerald-50' : 'bg-rose-50'} flex items-center justify-center`}>
+            <span className={`text-4xl font-bold ${scoreColor}`}>{percent}%</span>
+          </div>
+          <p className="text-xs text-slate-400 mt-2">
+            {result.score}/{result.total} câu đúng
+          </p>
+        </div>
+
+        {/* Info */}
+        <div className="flex-1 text-center md:text-left">
+          <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium mb-3 ${isGood ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-500'}`}>
+            {isGood ? <CheckCircle2 className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />}
+            {isGood ? 'Vượt qua' : 'Cần cải thiện'}
+          </div>
+          <h1 className="text-xl font-semibold text-slate-900 mb-1">
+            {isGood ? 'Hoàn thành tốt!' : 'Hãy thử lại nhé!'}
+          </h1>
+          {doc && (
+            <p className="text-sm text-slate-400 flex items-center gap-1.5 justify-center md:justify-start">
+              <BookOpen className="w-3.5 h-3.5" />
+              {doc.filename}
+            </p>
           )}
-        </motion.div>
-        
-        <h1 className="text-5xl font-black text-slate-900 mb-4 tracking-tighter flex items-center justify-center gap-4">
-          {isGood ? 'Hoàn thành xuất sắc!' : 'Cố gắng lên nhé!'} 
-          {isGood ? <PartyPopper className="w-10 h-10 text-amber-500" /> : <Rocket className="w-10 h-10 text-indigo-400" />}
-        </h1>
-        <p className="text-xl text-slate-500 font-medium">
-          Bạn đạt <span className={`${isGood ? 'text-emerald-500' : 'text-rose-500'} font-black text-2xl`}>{result.score}/{result.total}</span> điểm 
-          cho bài học <span className="text-indigo-500 font-bold bg-indigo-50 px-3 py-1 rounded-xl mx-1">{doc?.filename}</span>
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
-           <div className="bg-white border border-slate-100 rounded-[3rem] p-10 relative overflow-hidden shadow-sm shadow-indigo-500/5 group hover:shadow-xl transition-shadow duration-500">
-             <div className="absolute top-0 right-0 p-10 opacity-[0.03] pointer-events-none text-indigo-500 group-hover:scale-110 transition-transform duration-700">
-               <BrainCircuit className="w-64 h-64" />
-             </div>
-             
-             <h2 className="text-2xl font-black mb-6 text-slate-800 flex items-center gap-3">
-               <div className="p-2.5 bg-indigo-100 rounded-2xl"><Sparkles className="w-6 h-6 text-indigo-600" /></div> Phân tích của AI
-             </h2>
-             
-             <div className="prose prose-indigo max-w-none text-slate-600 font-medium leading-relaxed">
-               {result.feedback ? (
-                 <ReactMarkdown>{result.feedback}</ReactMarkdown>
-               ) : (
-                 <p>Hệ thống ghi nhận kết quả tốt. Hãy tiếp tục duy trì phong độ và ôn tập định kỳ để ghi nhớ kiến thức lâu hơn.</p>
-               )}
-             </div>
-           </div>
-
-           <div className="flex flex-col sm:flex-row gap-4">
-             <button 
-               onClick={() => navigate(`/quiz/${docId}`)}
-               className="flex-1 px-8 py-5 rounded-[2rem] bg-slate-100 hover:bg-slate-200 text-slate-700 font-black flex items-center justify-center gap-3 transition-all active:scale-95 text-lg border-b-4 border-slate-200"
-             >
-               <RotateCcw className="w-6 h-6" /> Thử sức lại
-             </button>
-             <button 
-               onClick={() => navigate('/lessons')}
-               className="flex-1 px-10 py-5 rounded-[2rem] bg-slate-900 text-white font-black flex items-center justify-center gap-4 transition-all shadow-xl hover:shadow-indigo-500/20 active:scale-95 text-lg"
-             >
-               Tiếp tục học tập <ArrowRight className="w-7 h-7" />
-             </button>
-           </div>
+          <p className="text-sm text-slate-500 mt-3 leading-relaxed max-w-md">{advice}</p>
         </div>
 
-        <div className="space-y-8">
-           <div className="bg-emerald-500 rounded-[3rem] p-10 text-white shadow-xl shadow-emerald-500/20 relative overflow-hidden group">
-              <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
-              <CheckCircle2 className="w-12 h-12 mb-6" />
-              <h3 className="text-2xl font-black mb-2 tracking-tight">Kỹ năng đạt được</h3>
-              <p className="text-emerald-50/80 font-bold text-sm uppercase tracking-widest mb-6">Mastery Level</p>
-              <div className="text-6xl font-black tracking-tighter mb-4">{percent}%</div>
-              <div className="h-2 w-full bg-white/20 rounded-full overflow-hidden">
-                 <motion.div 
-                   initial={{ width: 0 }}
-                   animate={{ width: `${percent}%` }}
-                   className="h-full bg-white"
-                 />
-              </div>
-           </div>
-
-           <div className="bg-white border border-slate-100 rounded-[3rem] p-10 shadow-sm flex flex-col items-center text-center">
-              <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center mb-6">
-                 <Target className="w-8 h-8 text-indigo-500" />
-              </div>
-              <h4 className="text-lg font-black text-slate-800 mb-2">Lời khuyên</h4>
-              <p className="text-slate-400 font-medium text-sm leading-relaxed">
-                 {percent >= 90 
-                   ? "Thật không thể tin được! Bạn đã làm chủ hoàn toàn kiến thức này. Hãy chuyển sang tài liệu tiếp theo."
-                   : percent >= 70
-                   ? "Phong độ rất tốt. Hãy làm thêm một bài Quiz nữa để đạt điểm số tuyệt đối nhé!"
-                   : "Đừng nản chí! Hãy xem lại các bài học con để hiểu rõ hơn những phần còn vướng mắc."
-                 }
-              </p>
-           </div>
+        {/* Score bar */}
+        <div className="flex-shrink-0 w-full md:w-32">
+          <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${percent}%` }}
+              transition={{ duration: 0.8, ease: 'easeOut' }}
+              className={`h-full ${scoreBg} rounded-full`}
+            />
+          </div>
+          <p className="text-xs text-slate-400 mt-1.5 text-center">{percent}% hoàn thành</p>
         </div>
       </div>
-      
-      <div className="pb-20" />
+
+      {/* Content grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-10">
+        {/* Feedback */}
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-2xl border border-slate-100 p-6">
+            <div className="flex items-center gap-2 mb-5">
+              <Target className="w-4 h-4 text-orange-500" />
+              <h2 className="text-sm font-semibold text-slate-800">Nhận xét từ Roboki</h2>
+            </div>
+            <div className="prose prose-slate prose-sm max-w-none text-slate-600">
+              {result.feedback ? (
+                <ReactMarkdown>{result.feedback}</ReactMarkdown>
+              ) : (
+                <p>Hệ thống ghi nhận kết quả. Hãy tiếp tục duy trì thói quen học tập hàng ngày để cải thiện hơn nữa.</p>
+              )}
+            </div>
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 mt-4">
+            <button
+              onClick={() => navigate(`/quiz/${docId}`)}
+              className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white border border-slate-200 text-slate-600 text-sm font-medium hover:border-slate-300 transition-colors"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Làm lại
+            </button>
+            <button
+              onClick={() => navigate('/lessons')}
+              className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors"
+            >
+              Tiếp tục học
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Side stats */}
+        <div className="space-y-4">
+          <div className={`rounded-2xl p-6 text-white ${isGood ? 'bg-emerald-500' : 'bg-orange-500'}`}>
+            <p className="text-xs font-medium opacity-80 mb-1">Điểm số</p>
+            <div className="text-5xl font-bold mb-1">{result.score}</div>
+            <p className="text-sm opacity-70">/ {result.total} câu hỏi</p>
+          </div>
+
+          <div className="bg-white rounded-2xl border border-slate-100 p-5">
+            <p className="text-xs text-slate-400 mb-1">Tỉ lệ đúng</p>
+            <p className={`text-2xl font-semibold mb-3 ${scoreColor}`}>{percent}%</p>
+            <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${percent}%` }}
+                transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }}
+                className={`h-full ${scoreBg} rounded-full`}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
     </motion.div>
   );
 }

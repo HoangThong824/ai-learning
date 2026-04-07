@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Bell, X, ArrowRight, Sparkles } from 'lucide-react';
+import { Bell, X, ArrowRight, Flame } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function ReminderBanner({ onClose }) {
@@ -7,39 +7,49 @@ export default function ReminderBanner({ onClose }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="mx-6 mt-4 mb-2 p-4 rounded-3xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-xl shadow-indigo-500/20 flex items-center justify-between gap-4 relative overflow-hidden group"
+      initial={{ height: 0, opacity: 0 }}
+      animate={{ height: 'auto', opacity: 1 }}
+      exit={{ height: 0, opacity: 0 }}
+      transition={{ type: 'spring', stiffness: 200, damping: 28 }}
+      className="w-full bg-orange-500 shrink-0 overflow-hidden"
     >
-      <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-      <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
-      
-      <div className="flex items-center gap-4 relative z-10">
-        <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center animate-bounce shadow-lg shadow-black/5">
-          <Bell className="w-6 h-6 text-white" />
+      <div className="px-5 py-3 flex items-center justify-between gap-4 max-w-7xl mx-auto">
+        {/* Left */}
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0">
+            <Bell className="w-3.5 h-3.5 text-white" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-white leading-none">
+              Hôm nay bạn chưa học gì!
+            </p>
+            <p className="text-xs text-orange-100 mt-0.5 hidden sm:block truncate">
+              Chỉ 15 phút mỗi ngày — hãy duy trì chuỗi học của bạn.
+            </p>
+          </div>
+          <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 bg-white/15 rounded-lg flex-shrink-0">
+            <Flame className="w-3.5 h-3.5 text-amber-200 fill-amber-200" />
+            <span className="text-xs font-medium text-white">Duy trì streak</span>
+          </div>
         </div>
-        <div>
-          <h4 className="font-black text-lg tracking-tight flex items-center gap-2">
-            Đã đến lúc học rồi! <Sparkles className="w-4 h-4 text-yellow-300" />
-          </h4>
-          <p className="text-white/80 text-sm font-medium">Hôm nay bạn chưa có hoạt động nào. Hãy giữ vững phong độ nhé!</p>
-        </div>
-      </div>
 
-      <div className="flex items-center gap-3 relative z-10">
-        <button
-          onClick={() => navigate('/lessons')}
-          className="px-5 py-2.5 rounded-xl bg-white text-indigo-600 font-black text-sm shadow-lg hover:shadow-indigo-500/10 transition-all transform hover:-translate-y-0.5 active:scale-95 flex items-center gap-2"
-        >
-          Học ngay <ArrowRight className="w-4 h-4" />
-        </button>
-        <button
-          onClick={onClose}
-          className="p-2.5 rounded-xl hover:bg-white/20 transition-colors text-white/70 hover:text-white"
-        >
-          <X className="w-5 h-5" />
-        </button>
+        {/* Right */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <button
+            onClick={() => navigate('/lessons')}
+            className="flex items-center gap-1.5 px-4 py-1.5 bg-white text-orange-600 text-xs font-semibold rounded-lg hover:bg-orange-50 transition-colors shadow-sm"
+          >
+            Học ngay
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+            aria-label="Đóng"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </motion.div>
   );
