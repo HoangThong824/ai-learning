@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import logoSvg from '../assets/logo.svg';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, User, X, Loader2, MessageCircle, Maximize2, Minimize2, Trash2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
@@ -129,7 +130,7 @@ export default function TutorChat({ docId, context }) {
               className="flex items-center gap-3 pl-5 pr-7 py-4 bg-slate-900 text-white rounded-l-2xl shadow-sm border border-slate-800 transition-all hover:bg-slate-800 active:scale-95 group"
             >
               <div className="relative">
-                <img src="/src/assets/logo.svg" alt="Logo" className="w-6 h-6 object-contain" />
+                <img src={logoSvg} alt="Logo" className="w-6 h-6 object-contain" />
               </div>
               <div className="flex flex-col items-start leading-tight">
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-50">Gia sư trực tuyến</span>
@@ -156,7 +157,7 @@ export default function TutorChat({ docId, context }) {
             <div className="px-5 py-5 border-b border-slate-200 flex items-center justify-between bg-white cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center border border-orange-100">
-                  <img src="/src/assets/logo.svg" alt="Roboki Logo" className="w-6 h-6 object-contain" />
+                  <img src={logoSvg} alt="Roboki Logo" className="w-6 h-6 object-contain" />
                 </div>
                 <div>
                   <h3 className="font-black text-slate-900 text-sm uppercase tracking-tight">Roboki Gia Sư</h3>
@@ -190,7 +191,7 @@ export default function TutorChat({ docId, context }) {
                 >
                   {msg.role === 'assistant' && (
                     <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0 mt-1">
-                      <img src="/src/assets/logo.svg" alt="Avatar" className="w-5 h-5 object-contain" />
+                      <img src={logoSvg} alt="Avatar" className="w-5 h-5 object-contain" />
                     </div>
                   )}
                   <div className={`max-w-[75%] rounded-2xl p-4 ${msg.role === 'user'
@@ -216,7 +217,7 @@ export default function TutorChat({ docId, context }) {
               {isLoading && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3 justify-start items-start">
                   <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0 mt-1">
-                    <img src="/src/assets/logo.svg" alt="Avatar" className="w-5 h-5 object-contain animate-pulse" />
+                    <img src={logoSvg} alt="Avatar" className="w-5 h-5 object-contain animate-pulse" />
                   </div>
                   <div className="bg-white border border-slate-200 rounded-xl rounded-tl-sm p-4 flex items-center gap-1.5 shadow-sm">
                     <div className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-bounce" style={{ animationDelay: '0ms' }} />

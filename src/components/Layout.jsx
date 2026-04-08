@@ -1,4 +1,5 @@
 import { Outlet, NavLink } from 'react-router-dom';
+import logoSvg from '../assets/logo.svg';
 import { LayoutDashboard, FileText, BookOpen, Settings as SettingsIcon, History, GraduationCap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
@@ -49,8 +50,8 @@ export default function Layout() {
           if (lastNotifiedDate !== today) {
             const notification = new Notification('Roboki Gia Sư', {
               body: 'Đã đến giờ học rồi! Hôm nay bạn chưa có hoạt động nào. Hãy giữ vững phong độ nhé!',
-              icon: '/src/assets/logo.svg',
-              badge: '/src/assets/logo.svg',
+              icon: logoSvg,
+              badge: logoSvg,
               tag: 'study-reminder'
             });
 
@@ -92,7 +93,7 @@ export default function Layout() {
         {/* Logo */}
         <div className="px-6 py-7 flex items-center gap-3">
           <div className="w-9 h-9 bg-orange-500 rounded-xl flex items-center justify-center shadow-sm">
-            <img src="/src/assets/logo.svg" alt="Roboki Logo" className="w-5 h-5 object-contain brightness-0 invert" />
+            <img src={logoSvg} alt="Roboki Logo" className="w-5 h-5 object-contain brightness-0 invert" />
           </div>
           <div>
             <h1 className="text-[15px] font-semibold text-slate-900 leading-none">Roboki</h1>
