@@ -240,7 +240,7 @@ export default function Quiz() {
           </h2>
           <p className="text-slate-500 text-sm font-bold mb-10 uppercase tracking-widest">Kết quả nỗ lực của bạn</p>
           
-          <div className="grid grid-cols-2 gap-4 mb-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
             <div className="p-5 rounded-xl bg-slate-50 border border-slate-200">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Điểm số</p>
               <p className="text-3xl font-black text-orange-600 tracking-tight">{score}/{questions.length}</p>
@@ -305,7 +305,7 @@ export default function Quiz() {
   const progress = ((currentIdx + 1) / questions.length) * 100;
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-6 lg:p-10 h-screen overflow-y-auto bg-slate-50 flex flex-col items-center">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 sm:p-6 lg:p-10 h-screen overflow-y-auto bg-slate-50 flex flex-col items-center">
       <div className="w-full max-w-4xl flex-1 flex flex-col">
         {/* Header/Info */}
         <div className="flex items-center justify-between mb-8 px-4">
@@ -344,7 +344,7 @@ export default function Quiz() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="bg-white border border-slate-200 rounded-2xl p-8 lg:p-12 shadow-sm relative"
+                className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 lg:p-12 shadow-sm relative"
               >
                 <div className="mb-8">
                   <span className="text-[10px] font-black text-orange-600 uppercase tracking-[0.2em] px-2 py-1 bg-orange-50 rounded border border-orange-100">Câu hỏi {currentIdx + 1}</span>
@@ -370,18 +370,18 @@ export default function Quiz() {
                         key={idx}
                         onClick={() => handleSelect(idx)}
                         disabled={showResult}
-                        className={`w-full text-left p-5 rounded-xl border transition-all font-bold text-base flex items-center justify-between group ${btnClass}`}
+                        className={`w-full text-left p-4 sm:p-5 rounded-xl border transition-all font-bold text-sm sm:text-base flex items-center justify-between group ${btnClass}`}
                       >
-                        <div className="flex items-center gap-4">
-                          <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs transition-all ${
+                        <div className="flex items-center gap-3 sm:gap-4">
+                          <span className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-[10px] sm:text-xs transition-all flex-shrink-0 ${
                             isSelected ? 'bg-orange-500 text-white' : 'bg-slate-200 text-slate-500 group-hover:bg-orange-100 group-hover:text-orange-600'
                           }`}>
                             {String.fromCharCode(65 + idx)}
                           </span>
-                          <span className="flex-1">{opt}</span>
+                          <span className="flex-1 leading-tight">{opt}</span>
                         </div>
-                        {showResult && isCorrect && <CheckCircle2 className="w-6 h-6 text-emerald-500" />}
-                        {showResult && isSelected && !isCorrect && <XCircle className="w-6 h-6 text-rose-500" />}
+                        {showResult && isCorrect && <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500 shrink-0" />}
+                        {showResult && isSelected && !isCorrect && <XCircle className="w-5 h-5 sm:w-6 sm:h-6 text-rose-500 shrink-0" />}
                       </button>
                     );
                   })}

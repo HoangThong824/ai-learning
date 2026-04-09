@@ -43,10 +43,10 @@ export default function Quizzes() {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="p-7 lg:p-10 min-h-full flex flex-col gap-7"
+      className="p-4 sm:p-6 lg:p-10 min-h-full flex flex-col gap-6 lg:gap-7"
     >
       {/* Header */}
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <header className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
             <Target className="w-4 h-4 text-emerald-500" />
@@ -90,7 +90,7 @@ export default function Quizzes() {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 pb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-5 pb-10">
           <AnimatePresence mode="popLayout">
             {quizzes.map((quiz, idx) => {
               const bestScore = getBestScore(quiz.documentId);

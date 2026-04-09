@@ -65,13 +65,13 @@ export default function Dashboard() {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="p-7 lg:p-10 min-h-full flex flex-col gap-8"
+      className="p-4 sm:p-6 lg:p-10 min-h-full flex flex-col gap-6 lg:gap-8"
     >
       {/* Header */}
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
+      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex-1 min-w-0">
           <p className="text-sm text-slate-400 mb-1">{greeting()} 👋</p>
-          <h1 className="text-2xl font-semibold text-slate-900">Tổng quan học tập</h1>
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight">Tổng quan học tập</h1>
         </div>
         <div
           className="flex items-center gap-3 px-4 py-3 bg-white rounded-xl border border-slate-200 cursor-pointer hover:border-orange-300 transition-colors"
@@ -88,8 +88,8 @@ export default function Dashboard() {
         </div>
       </header>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
         <StatCard
           icon={<FileText className="w-4 h-4" />}
           label="Tài liệu"
@@ -125,7 +125,7 @@ export default function Dashboard() {
       </div>
 
       {/* Content */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 flex-1 pb-10">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 lg:gap-6 flex-1 pb-10">
         {/* Recent activity */}
         <div className="xl:col-span-2">
           <div className="flex items-center justify-between mb-5">
@@ -265,14 +265,16 @@ function StatCard({ icon, label, value, sub, onClick, accent }) {
   return (
     <div
       onClick={onClick}
-      className="p-5 rounded-xl bg-white border border-slate-100 hover:border-slate-200 hover:shadow-sm transition-all cursor-pointer group"
+      className="p-4 sm:p-5 rounded-xl bg-white border border-slate-100 hover:border-orange-200 hover:shadow-md transition-all cursor-pointer group flex flex-row items-center gap-4 sm:flex-col sm:items-start sm:gap-0"
     >
-      <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-4 ${accent}`}>
+      <div className={`w-10 h-10 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center sm:mb-4 flex-shrink-0 ${accent}`}>
         {icon}
       </div>
-      <p className="text-2xl font-semibold text-slate-900 mb-0.5">{value}</p>
-      <p className="text-xs font-medium text-slate-600">{label}</p>
-      <p className="text-[11px] text-slate-400 mt-0.5">{sub}</p>
+      <div className="flex-1">
+        <p className="text-xl sm:text-2xl font-black text-slate-900 leading-none mb-1 sm:mb-0.5">{value}</p>
+        <p className="text-[11px] sm:text-xs font-bold text-slate-600 uppercase tracking-wider">{label}</p>
+        <p className="text-[10px] text-slate-400 mt-0.5 hidden sm:block">{sub}</p>
+      </div>
     </div>
   );
 }

@@ -123,7 +123,7 @@ export default function TutorChat({ docId, context }) {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
-            className="fixed bottom-28 right-0 z-50 flex items-center"
+            className="fixed bottom-24 right-0 z-50 flex items-center sm:bottom-28 lg:bottom-10"
           >
             <button
               onClick={() => setIsOpen(true)}
@@ -148,9 +148,10 @@ export default function TutorChat({ docId, context }) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className={`fixed z-50 flex flex-col bg-white shadow-sm border border-slate-200 overflow-hidden ${isExpanded
-              ? 'top-4 bottom-4 left-4 right-4 rounded-2xl'
-              : 'bottom-6 right-6 w-[380px] h-[600px] rounded-2xl max-h-[85vh] sm:w-[400px]'
+            className={`fixed z-50 flex flex-col bg-white shadow-sm border border-slate-200 overflow-hidden ${
+              isExpanded
+                ? 'top-4 bottom-4 left-4 right-4 rounded-2xl'
+                : 'bottom-0 right-0 left-0 sm:bottom-6 sm:right-6 sm:left-auto sm:w-[380px] sm:h-[600px] h-[75vh] sm:h-[85vh] rounded-t-2xl sm:rounded-2xl sm:max-h-[85vh] md:w-[400px]'
               } transition-all duration-300`}
           >
             {/* Header */}
@@ -231,7 +232,7 @@ export default function TutorChat({ docId, context }) {
 
             {/* Quick Prompts */}
             {!isLoading && messages[messages.length - 1]?.role === 'assistant' && (
-              <div className="px-4 py-3 bg-white border-t border-slate-100 flex gap-2 overflow-x-auto no-scrollbar">
+              <div className="px-4 py-3 bg-white border-t border-slate-100 flex gap-2 overflow-x-auto no-scrollbar scroll-smooth">
                 {quickPrompts.map((prompt, n) => (
                   <button
                     key={n}

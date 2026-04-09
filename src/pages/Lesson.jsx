@@ -118,6 +118,7 @@ export default function Lesson() {
   const [generateError, setGenerateError] = useState(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [activeSectionIndex, setActiveSectionIndex] = useState(0);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   // Scroll progress for the lesson
   const { scrollYProgress } = useScroll({
@@ -326,7 +327,7 @@ export default function Lesson() {
       )}
 
       {/* --- Top Header --- */}
-      <header className="px-6 lg:px-10 py-4 flex items-center gap-6 border-b border-slate-200 bg-white z-40">
+      <header className="px-4 sm:px-6 lg:px-10 py-3 lg:py-4 flex items-center gap-3 lg:gap-6 border-b border-slate-200 bg-white z-40">
         <button
           onClick={() => navigate('/lessons')}
           className="p-2.5 rounded-xl text-slate-400 hover:text-orange-600 hover:bg-orange-50 transition-all border border-slate-200 shadow-sm"
@@ -335,7 +336,7 @@ export default function Lesson() {
         </button>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 mb-0.5">
-            <h1 className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight truncate">
+            <h1 className="text-lg lg:text-2xl font-black text-slate-900 tracking-tight truncate">
               {doc.filename}
             </h1>
             {generatedLesson && (
@@ -361,8 +362,37 @@ export default function Lesson() {
       {/* --- Main Area --- */}
       <div className="flex-1 flex flex-col lg:flex-row gap-0 overflow-hidden relative">
 
+        {/* Mobile Sidebar Toggle */}
+        <div className="lg:hidden flex items-center gap-2 px-4 py-2 bg-white border-b border-slate-100">
+          <button
+            onClick={() => setMobileSidebarOpen(prev => !prev)}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-100 transition-colors"
+          >
+            <FileText className="w-3.5 h-3.5" />
+            {mobileSidebarOpen ? 'Ẩn mục lục' : (generatedLesson ? 'Mục lục' : 'Cấu trúc')}
+          </button>
+        </div>
+
+        {/* Backdrop for Mobile Sidebar */}
+        <AnimatePresence>
+          {mobileSidebarOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileSidebarOpen(false)}
+              className="lg:hidden fixed inset-0 bg-black/20 z-40 backdrop-blur-sm"
+            />
+          )}
+        </AnimatePresence>
+
         {/* ===== SIDEPANEL: Sections ===== */}
-        <aside className="lg:w-[320px] flex-shrink-0 flex flex-col bg-white border-r border-slate-200 z-30">
+        <aside className={`
+          flex-col bg-white z-50 transition-all duration-300
+          ${mobileSidebarOpen 
+            ? 'fixed inset-y-0 left-0 w-[280px] shadow-2xl flex border-r border-slate-100' 
+            : 'hidden lg:flex lg:w-[320px] lg:flex-shrink-0 lg:border-r lg:border-slate-200 lg:relative lg:z-30'}
+        `}>
           {generatedLesson ? (
             <>
               {/* Sidebar Header for TOC */}
@@ -386,12 +416,9 @@ export default function Lesson() {
                     key={idx}
                     onClick={() => {
                       setActiveSectionIndex(idx);
+                      setMobileSidebarOpen(false);
                       // Scroll inner content
                       contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-                      // Also scroll parent if on mobile (width < 1024)
-                      if (window.innerWidth < 1024) {
-                        window.scrollTo({ top: 400, behavior: 'smooth' });
-                      }
                     }}
                     className={`w-full text-left px-4 py-2.5 rounded-lg transition-all duration-200 font-bold text-sm leading-tight ${
                       activeSectionIndex === idx 
@@ -420,7 +447,11 @@ export default function Lesson() {
                 {chunks.map((chunk, idx) => (
                   <button
                     key={chunk.id || idx}
-                    onClick={() => { setSelectedChunk(chunk); setGenerateError(null); }}
+                    onClick={() => { 
+                      setSelectedChunk(chunk); 
+                      setGenerateError(null); 
+                      setMobileSidebarOpen(false);
+                    }}
                     className={`w-full text-left p-4 rounded-xl transition-all duration-200 border ${selectedChunk?.id === chunk.id
                         ? 'bg-orange-50 border-orange-200'
                         : 'bg-white border-transparent hover:bg-slate-50'
@@ -465,7 +496,7 @@ export default function Lesson() {
           {/* Content Scroll Area */}
           <div
             ref={contentRef}
-            className="flex-1 overflow-y-auto custom-scrollbar relative z-10 p-6 lg:p-12 xl:p-16"
+            className="flex-1 overflow-y-auto custom-scrollbar relative z-10 p-4 sm:p-8 lg:p-12 xl:p-16"
           >
             <AnimatePresence mode="wait">
               {isGenerating ? (
@@ -507,25 +538,27 @@ export default function Lesson() {
                   animate={{ opacity: 1, y: 0 }}
                   className="max-w-3xl mx-auto pb-32"
                 >
-                  {/* Floating Action Bar */}
-                  <div className="mb-12">
-                    <div className="inline-flex items-center gap-2 p-1.5 rounded-xl bg-white border border-slate-200 shadow-sm">
-                      <div className="px-3 border-r border-slate-100">
-                        <span className="text-[10px] font-black text-orange-600 uppercase tracking-widest">BÀI {activeSectionIndex + 1} / {lessonSections.length}</span>
+                  {/* Floating Action Bar (Optimized for Mobile) */}
+                  <div className="mb-8 lg:mb-12 flex flex-wrap gap-2">
+                    <div className="inline-flex items-center gap-2 p-1 sm:p-1.5 rounded-xl bg-white border border-slate-200 shadow-sm">
+                      <div className="px-2 sm:px-3 border-r border-slate-100">
+                        <span className="text-[9px] sm:text-[10px] font-black text-orange-600 uppercase tracking-widest whitespace-nowrap">
+                          {activeSectionIndex + 1} / {lessonSections.length}
+                        </span>
                       </div>
                       <button
                         onClick={copyToClipboard}
-                        className="p-2 rounded-lg hover:bg-slate-50 text-slate-400 hover:text-orange-600 transition-all flex items-center gap-2"
+                        className="p-1.5 sm:p-2 rounded-lg hover:bg-slate-50 text-slate-400 hover:text-orange-600 transition-all flex items-center gap-1.5 sm:gap-2"
                       >
-                        <Copy className="w-3.5 h-3.5" />
-                        <span className="text-[10px] font-black uppercase">Sao chép</span>
+                        <Copy className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
+                        <span className="text-[9px] sm:text-[10px] font-black uppercase">Sao chép</span>
                       </button>
                       <button
                         onClick={() => { setGeneratedLesson(null); setGenerateError(null); }}
-                        className="p-2 rounded-lg bg-orange-50 text-orange-600 hover:bg-orange-100 transition-all flex items-center gap-2"
+                        className="p-1.5 sm:p-2 rounded-lg bg-orange-50 text-orange-600 hover:bg-orange-100 transition-all flex items-center gap-1.5 sm:gap-2"
                       >
-                        <RotateCcw className="w-3.5 h-3.5" />
-                        <span className="text-[10px] font-black uppercase">Tạo lại</span>
+                        <RotateCcw className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
+                        <span className="text-[9px] sm:text-[10px] font-black uppercase">Tạo lại</span>
                       </button>
                     </div>
                   </div>

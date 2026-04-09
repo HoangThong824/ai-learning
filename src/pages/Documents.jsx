@@ -93,7 +93,7 @@ export default function Documents() {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="p-7 lg:p-10 min-h-full flex flex-col gap-7"
+      className="p-4 sm:p-6 lg:p-10 min-h-full flex flex-col gap-6 lg:gap-7"
     >
       {/* Header */}
       <header>
@@ -107,7 +107,7 @@ export default function Documents() {
         </p>
       </header>
 
-      <div className="flex-1 flex flex-col lg:flex-row gap-6">
+      <div className="flex-1 flex flex-col lg:flex-row gap-5 lg:gap-6">
         {/* Upload zone */}
         <div className="lg:w-80 flex-shrink-0">
           <form
@@ -133,14 +133,14 @@ export default function Documents() {
               </div>
             ) : (
               <div className="flex flex-col items-center gap-3">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${dragActive ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-400'}`}>
-                  <UploadCloud className="w-6 h-6" />
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center transition-colors ${dragActive ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-400'}`}>
+                  <UploadCloud className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-slate-700 mb-1">
-                    {dragActive ? 'Thả tệp vào đây' : 'Kéo thả hoặc nhấn để chọn'}
+                  <p className="text-sm font-bold text-slate-700 mb-1">
+                    {dragActive ? 'Thả tệp vào đây' : 'Tải tài liệu lên'}
                   </p>
-                  <p className="text-xs text-slate-400">PDF, DOCX, TXT — tối đa 50MB</p>
+                  <p className="text-[11px] text-slate-400">PDF, DOCX, TXT — Tối đa 50MB</p>
                 </div>
               </div>
             )}
@@ -205,17 +205,17 @@ export default function Documents() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-2 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={() => navigate(`/lesson/${doc.id}`)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-700 text-white text-xs font-medium transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-600 lg:bg-slate-900 border border-orange-700 lg:border-transparent hover:bg-orange-700 lg:hover:bg-slate-700 text-white text-[10px] sm:text-xs font-bold transition-colors shadow-sm"
                       >
-                        <GraduationCap className="w-3.5 h-3.5" />
+                        <GraduationCap className="w-3.5 h-3.5 hidden sm:inline-block" />
                         Học ngay
                       </button>
                       <button
                         onClick={() => handleDelete(doc.id)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                        className="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors border border-slate-100 lg:border-transparent"
                         title="Xóa tài liệu"
                       >
                         <Trash2 className="w-4 h-4" />
