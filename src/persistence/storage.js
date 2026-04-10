@@ -83,8 +83,11 @@ export const saveSettings = (settings) => {
 export const getLessonOutlines = () => storage.get(Keys.LESSON_OUTLINES, []);
 export const saveLessonOutline = (outline) => {
   const current = getLessonOutlines();
-  // Update if exists, else add
-  const existingIdx = current.findIndex(o => o.documentId === outline.documentId);
+  // Update if exists (matching both docId and chunkId), else add
+  const existingIdx = current.findIndex(o => 
+    o.documentId === outline.documentId && 
+    (outline.chunkId !== undefined ? o.chunkId === outline.chunkId : true)
+  );
   if (existingIdx >= 0) {
     current[existingIdx] = outline;
   } else {
@@ -105,7 +108,11 @@ export const saveQuizResult = (result) => {
 export const getQuizzes = () => storage.get(Keys.QUIZZES, []);
 export const saveQuiz = (quiz) => {
   const current = getQuizzes();
-  const existingIdx = current.findIndex(q => q.documentId === quiz.documentId);
+  // Update if exists (matching both docId and chunkId), else add
+  const existingIdx = current.findIndex(q => 
+    q.documentId === quiz.documentId && 
+    (quiz.chunkId !== undefined ? q.chunkId === quiz.chunkId : true)
+  );
   if (existingIdx >= 0) {
     current[existingIdx] = quiz;
   } else {

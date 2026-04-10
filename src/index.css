@@ -50,3 +50,46 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #cbd5e1;
 }
+
+/* Enhancing Prose (Markdown) Styles */
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.9rem;
+  background: white;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.prose th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 700;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.prose td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  color: #64748b;
+}
+
+.prose tr:last-child td {
+  border-bottom: none;
+}
+
+/* Better highlights for Key Points and Examples */
+.prose blockquote {
+  font-style: normal;
+  font-weight: 500;
+  position: relative;
+}
+
+.prose blockquote p::before,
+.prose blockquote p::after {
+  content: none !important;
+}

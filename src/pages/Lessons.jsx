@@ -77,12 +77,12 @@ export default function Lessons() {
           <AnimatePresence mode="popLayout">
             {lessons.map((lesson, idx) => (
               <motion.div
-                key={lesson.documentId || idx}
+                key={`${lesson.documentId}-${lesson.chunkId || 0}`}
                 layout
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.04 }}
-                onClick={() => navigate(`/lesson/${lesson.documentId}`)}
+                onClick={() => navigate(`/lesson/${lesson.documentId}${lesson.chunkId ? `/${lesson.chunkId}` : ''}`)}
                 className="group cursor-pointer bg-white border border-slate-100 rounded-2xl p-6 hover:border-slate-200 hover:shadow-md transition-all duration-200 flex flex-col h-full"
               >
                 {/* Card top */}
@@ -100,6 +100,9 @@ export default function Lessons() {
                   <p className="text-[11px] text-slate-400 mb-1.5 flex items-center gap-1.5 truncate">
                     <FileText className="w-3 h-3 flex-shrink-0" />
                     {getDocName(lesson.documentId)}
+                    {lesson.chunkId && (
+                      <span className="ml-1 px-1.5 py-0.5 rounded bg-slate-100 text-[9px] font-bold">Phần {lesson.chunkId}</span>
+                    )}
                   </p>
                   <h3 className="text-sm font-semibold text-slate-900 group-hover:text-violet-600 transition-colors leading-snug mb-3 line-clamp-2">
                     {lesson.title || 'Bài học'}

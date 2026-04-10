@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   CheckCircle2, XCircle, ArrowRight, 
@@ -16,7 +16,10 @@ import TutorChat from '../components/TutorChat';
 export default function Quiz() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const docId = Number(id);
+  const queryParams = new URLSearchParams(location.search);
+  const chunkId = queryParams.get('chunkId') ? Number(queryParams.get('chunkId')) : null;
 
   const [doc, setDoc] = useState(null);
   const [questions, setQuestions] = useState([]);
@@ -39,10 +42,22 @@ export default function Quiz() {
         setDoc(loadedDoc);
         
         const allQuizzes = getQuizzes();
-        const found = allQuizzes.find(q => q.documentId === docId);
-        if (found && found.questions) {
-          setQuestions(found.questions);
+        let questionsToSet = [];
+        
+        if (chunkId !== null) {
+          const found = allQuizzes.find(q => q.documentId === docId && q.chunkId === chunkId);
+          if (found && found.questions) {
+            questionsToSet = found.questions;
+          }
+        } else {
+          // Comprehensive mode: combine all questions for this document
+          const docQuizzes = allQuizzes.filter(q => q.documentId === docId);
+          questionsToSet = docQuizzes.flatMap(q => q.questions || []);
+          // Optional: shuffle questions
+          questionsToSet = questionsToSet.sort(() => Math.random() - 0.5);
         }
+        
+        setQuestions(questionsToSet);
       } catch (error) {
         console.error("Error loading quiz data:", error);
       } finally {
@@ -63,12 +78,30 @@ export default function Quiz() {
   useEffect(() => {
     if (doc) {
       const outlines = getLessonOutlines();
-      const currentOutline = outlines.find(o => o.documentId === docId);
+      let lessonTitle = doc.filename;
+      let combinedContent = '';
+
+      if (chunkId !== null) {
+        const currentOutline = outlines.find(o => o.documentId === docId && o.chunkId === chunkId);
+        if (currentOutline) {
+          lessonTitle = currentOutline.title;
+          combinedContent = currentOutline.content;
+        }
+      } else {
+        // Comprehensive mode
+        lessonTitle = `Tổng ôn: ${doc.filename}`;
+        combinedContent = outlines
+          .filter(o => o.documentId === docId)
+          .sort((a, b) => (a.chunkId || 0) - (b.chunkId || 0))
+          .map(o => `### ${o.title}\n\n${o.content}`)
+          .join('\n\n---\n\n');
+      }
+
       const progress = getUserProgress(docId);
       setTutorContext(prev => ({
         ...prev,
-        docTitle: doc.filename,
-        lessonContent: currentOutline ? currentOutline.content : '',
+        docTitle: lessonTitle,
+        lessonContent: combinedContent,
         userProgress: progress,
         currentQuestion: questions[currentIdx],
         isConfirmed: isConfirmed,
@@ -107,7 +140,10 @@ export default function Quiz() {
       setIsLoadingFeedback(true);
       try {
         const outlines = getLessonOutlines();
-        const currentOutline = outlines.find(o => o.documentId === docId);
+        const currentOutline = outlines.find(o => 
+          o.documentId === docId && 
+          (chunkId !== null ? o.chunkId === chunkId : true)
+        );
         const lessonContent = currentOutline ? currentOutline.content : '';
 
         const feedbackData = await getQuizFeedback(questions, score, doc?.filename || 'Bài học', lessonContent, missedQuestions);
@@ -122,6 +158,7 @@ export default function Quiz() {
       
       saveQuizResult({
         documentId: docId,
+        chunkId: chunkId,
         score,
         total: questions.length
       });
@@ -188,7 +225,7 @@ export default function Quiz() {
         </div>
         <h2 className="text-2xl font-bold text-slate-700 mb-2">Chưa có Quiz cho tài liệu này</h2>
         <p className="text-slate-500 mb-6 max-w-sm">Hãy quay lại mục Bài học và nhấn "Tạo bài học AI" để hệ thống tự động tạo Quiz cho bạn nhé!</p>
-        <button onClick={() => navigate(`/lesson/${docId}`)} className="px-8 py-3 rounded-full bg-orange-500 text-white font-bold shadow-md hover:bg-orange-600 transition-all">
+        <button onClick={() => navigate(`/lesson/${docId}${chunkId ? `/${chunkId}` : ''}`)} className="px-8 py-3 rounded-full bg-orange-500 text-white font-bold shadow-md hover:bg-orange-600 transition-all">
           Quay lại Bài học
         </button>
       </div>
@@ -206,7 +243,7 @@ export default function Quiz() {
           <h1 className="text-3xl font-black text-slate-900 mb-4 tracking-tight uppercase">Sẵn sàng thử thách?</h1>
           <p className="text-slate-500 text-base font-bold mb-10 leading-relaxed uppercase tracking-widest text-[11px]">
             Bộ câu hỏi gồm <strong className="text-orange-600">{questions.length} câu</strong> dựa trên: <br/>
-            <span className="text-slate-800 normal-case text-lg mt-1 block">{doc?.filename}</span>
+            <span className="text-slate-800 normal-case text-lg mt-1 block break-words">{doc?.filename}</span>
           </p>
           <div className="flex flex-col gap-3">
             <button 
@@ -271,9 +308,10 @@ export default function Quiz() {
             {extraQuestions.length > 0 && (
               <button
                 onClick={handleStartRemedial}
-                className="mt-4 w-full py-4 rounded-xl bg-orange-500 text-white font-black text-sm uppercase tracking-widest shadow-sm hover:bg-orange-600 transition-all flex items-center justify-center gap-2"
+                className="mt-4 w-full py-3 sm:py-4 px-2 rounded-xl bg-orange-500 text-white font-black text-xs sm:text-sm uppercase tracking-wider sm:tracking-widest shadow-sm hover:bg-orange-600 transition-all flex items-center justify-center gap-1 sm:gap-2"
               >
-                <GraduationCap className="w-5 h-5" /> Thử thách bổ sung
+                <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+                <span className="text-center">Thử thách bổ sung</span>
               </button>
             )}
           </div>

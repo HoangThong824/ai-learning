@@ -5,7 +5,7 @@ import {
   BookOpen, Loader2, ArrowLeft, FileText,
   RotateCcw, AlertCircle, CheckCircle2,
   GraduationCap, Share2, Download, Copy, ChevronUp, ChevronRight,
-  Target, Plus
+  Target, Plus, Trophy
 } from 'lucide-react';
 import { getDocument, getChunksForDocument } from '../persistence/db';
 import { generateLessonOutline, generateQuiz } from '../api/ai';
@@ -56,14 +56,14 @@ const parseLessonSections = (markdown) => {
 
   for (const line of lines) {
     if (line.trim().startsWith('```')) isCodeBlock = !isCodeBlock;
-    
+
     if (!isCodeBlock) {
       const match = line.match(/^(#{1,3})\s+(.*)$/);
       if (match) {
         const level = match[1].length;
         if (level >= 2) {
           if (currentSection.content.length > 0) {
-            sections.push({...currentSection, content: currentSection.content.join('\n')});
+            sections.push({ ...currentSection, content: currentSection.content.join('\n') });
           }
           const rawText = (match[2] || '').trim();
           const plainText = rawText.replace(/[*_`]/g, '') || `Phần ${sections.length + 1}`;
@@ -80,20 +80,20 @@ const parseLessonSections = (markdown) => {
     }
     currentSection.content.push(line);
   }
-  
+
   if (currentSection.content.length > 0) {
-    sections.push({...currentSection, content: currentSection.content.join('\n')});
+    sections.push({ ...currentSection, content: currentSection.content.join('\n') });
   }
-  
+
   // If no sections were found (i.e. only the intro or no content), 
   // ensure we return something usable.
   if (sections.length === 0 && markdown.trim().length > 0) {
-     return [{
-       level: 1,
-       title: 'Bài học',
-       slug: 'full-content',
-       content: markdown
-     }];
+    return [{
+      level: 1,
+      title: 'Bài học',
+      slug: 'full-content',
+      content: markdown
+    }];
   }
 
   return sections.filter((s) => {
@@ -105,7 +105,7 @@ const parseLessonSections = (markdown) => {
 
 
 export default function Lesson() {
-  const { id } = useParams();
+  const { id, chunkId } = useParams();
   const navigate = useNavigate();
   const contentRef = useRef(null);
 
@@ -119,6 +119,8 @@ export default function Lesson() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [activeSectionIndex, setActiveSectionIndex] = useState(0);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [isBulkProcessing, setIsBulkProcessing] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0 });
 
   // Scroll progress for the lesson
   const { scrollYProgress } = useScroll({
@@ -156,20 +158,40 @@ export default function Lesson() {
         const loadedChunks = await getChunksForDocument(docId);
         setDoc(loadedDoc);
         setChunks(loadedChunks || []);
-        if (loadedChunks?.length > 0) setSelectedChunk(loadedChunks[0]);
-        const saved = getLessonOutlines();
-        const existing = saved.find(o => o.documentId === docId);
-        if (existing) {
-          setGeneratedLesson({ title: existing.title, content: existing.content });
-          
-          // Restore progress
-          const progress = getUserProgress(docId);
-          if (progress.lastSection) {
-            const sections = parseLessonSections(existing.content);
-            const idx = sections.findIndex(s => s.slug === progress.lastSection);
-            if (idx >= 0) setActiveSectionIndex(idx);
+
+        // chunkId in URL takes precedence
+        const targetChunkId = chunkId ? Number(chunkId) : (loadedChunks?.[0]?.id);
+
+        if (loadedChunks?.length > 0) {
+          const matchedChunk = loadedChunks.find(c => c.id === targetChunkId) || loadedChunks[0];
+          setSelectedChunk(matchedChunk);
+
+          // Check for existing lesson for this specific chunk
+          const saved = getLessonOutlines();
+          const existing = saved.find(o => o.documentId === docId && o.chunkId === matchedChunk.id);
+
+          if (existing) {
+            setGeneratedLesson({ title: existing.title, content: existing.content });
+
+            // Restore progress
+            const progress = getUserProgress(docId);
+            if (progress.lastSection) {
+              const sections = parseLessonSections(existing.content);
+              const idx = sections.findIndex(s => s.slug === progress.lastSection);
+              if (idx >= 0) setActiveSectionIndex(idx);
+            }
           }
         }
+
+        // Automatic bulk generate if any lessons are missing for this document
+        const savedLessons = getLessonOutlines();
+        const existingLessons = savedLessons.filter(o => o.documentId === docId);
+        const missing = loadedChunks?.filter(c => !existingLessons.find(o => o.chunkId === c.id)) || [];
+
+        if (loadedChunks?.length > 0 && missing.length > 0 && id !== 'demo') {
+          handleBulkGenerate(missing);
+        }
+
       } catch (error) {
         console.error("Error loading lesson data:", error);
       } finally {
@@ -178,6 +200,30 @@ export default function Lesson() {
     };
     loadData();
   }, [id]);
+
+  // Effect to handle chunkId changes from URL
+  useEffect(() => {
+    if (chunks.length > 0 && chunkId && id !== 'demo') {
+      const targetId = Number(chunkId);
+      const matched = chunks.find(c => c.id === targetId);
+      if (matched && matched.id !== selectedChunk?.id) {
+        setSelectedChunk(matched);
+        setGenerateError(null);
+
+        // Load existing lesson for this chunk
+        const docId = Number(id);
+        const saved = getLessonOutlines();
+        const existing = saved.find(o => o.documentId === docId && o.chunkId === matched.id);
+
+        if (existing) {
+          setGeneratedLesson({ title: existing.title, content: existing.content });
+          setActiveSectionIndex(0);
+        } else if (!isGenerating) {
+          setGeneratedLesson(null);
+        }
+      }
+    }
+  }, [chunkId, chunks, id]);
 
   // Track progress when section changes
   useEffect(() => {
@@ -236,10 +282,10 @@ export default function Lesson() {
       });
 
       // Also generate and save a companion quiz
-      // cũng tự động tạo và lưu Quiz đi kèm
       const quiz = await generateQuiz(lesson.content);
       saveQuiz({
         documentId: Number(id),
+        chunkId: selectedChunk.id,
         questions: quiz.questions,
         createdAt: new Date().toISOString(),
       });
@@ -249,6 +295,55 @@ export default function Lesson() {
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const handleBulkGenerate = async (chunksToProcess) => {
+    if (!chunksToProcess || chunksToProcess.length === 0) return;
+
+    setIsBulkProcessing(true);
+    setBulkProgress({ current: 0, total: chunksToProcess.length });
+
+    for (let i = 0; i < chunksToProcess.length; i++) {
+      const chunk = chunksToProcess[i];
+
+      // Skip if already generating manually
+      if (isGenerating && chunk.id === selectedChunk?.id) continue;
+
+      try {
+        const lesson = await generateLessonOutline(chunk.content);
+        saveLessonOutline({
+          documentId: Number(id),
+          title: lesson.title,
+          content: lesson.content,
+          chunkId: chunk.id,
+          createdAt: new Date().toISOString(),
+        });
+
+        const quiz = await generateQuiz(lesson.content);
+        saveQuiz({
+          documentId: Number(id),
+          chunkId: chunk.id,
+          questions: quiz.questions,
+          createdAt: new Date().toISOString(),
+        });
+
+        // Update UI if this is the currently viewed chunk
+        if (chunk.id === (chunkId ? Number(chunkId) : chunks[0]?.id)) {
+          setGeneratedLesson(lesson);
+          setActiveSectionIndex(0);
+        }
+
+        setBulkProgress(prev => ({ ...prev, current: i + 1 }));
+      } catch (err) {
+        console.error(`[Bulk Gen] Error processing chunk ${chunk.id}:`, err);
+      }
+
+      // Small delay to prevent API overloading
+      await new Promise(r => setTimeout(r, 500));
+    }
+
+    setIsBulkProcessing(false);
+    trackActivity();
   };
 
   const copyToClipboard = () => {
@@ -307,15 +402,15 @@ export default function Lesson() {
       className="h-full flex flex-col bg-slate-50/30 overflow-y-auto lg:overflow-hidden"
     >
       {/* Tutor Chat Integration */}
-      <TutorChat 
-        docId={id} 
+      <TutorChat
+        docId={id}
         context={{
           docTitle: doc?.filename,
           lessonContent: generatedLesson ? parseLessonSections(generatedLesson.content).map(s => s.content).join('\n') : '',
           currentSection: activeSection,
           quizStatus: false,
           userProgress: getUserProgress(Number(id))
-        }} 
+        }}
       />
 
       {/* --- Progress Bar (Sticky) --- */}
@@ -389,16 +484,16 @@ export default function Lesson() {
         {/* ===== SIDEPANEL: Sections ===== */}
         <aside className={`
           flex-col bg-white z-50 transition-all duration-300
-          ${mobileSidebarOpen 
-            ? 'fixed inset-y-0 left-0 w-[280px] shadow-2xl flex border-r border-slate-100' 
+          ${mobileSidebarOpen
+            ? 'fixed inset-y-0 left-0 w-[280px] shadow-2xl flex border-r border-slate-100'
             : 'hidden lg:flex lg:w-[320px] lg:flex-shrink-0 lg:border-r lg:border-slate-200 lg:relative lg:z-30'}
         `}>
           {generatedLesson ? (
             <>
               {/* Sidebar Header for TOC */}
               <div className="px-6 py-6 border-b border-slate-50">
-                <button 
-                  onClick={() => setGeneratedLesson(null)} 
+                <button
+                  onClick={() => setGeneratedLesson(null)}
                   className="mb-4 flex items-center gap-2 text-slate-400 hover:text-orange-600 font-bold transition-colors text-[10px] uppercase tracking-widest"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" /> Về cấu trúc
@@ -420,11 +515,10 @@ export default function Lesson() {
                       // Scroll inner content
                       contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
                     }}
-                    className={`w-full text-left px-4 py-2.5 rounded-lg transition-all duration-200 font-bold text-sm leading-tight ${
-                      activeSectionIndex === idx 
-                        ? 'bg-orange-500 text-white shadow-sm' 
-                        : 'text-slate-600 hover:bg-slate-50 ' + (item.level === 2 ? 'mt-2' : 'pl-8 text-xs font-medium opacity-70')
-                    }`}
+                    className={`w-full text-left px-4 py-2.5 rounded-lg transition-all duration-200 font-bold text-sm leading-tight ${activeSectionIndex === idx
+                      ? 'bg-orange-500 text-white shadow-sm'
+                      : 'text-slate-600 hover:bg-slate-50 ' + (item.level === 2 ? 'mt-2' : 'pl-8 text-xs font-medium opacity-70')
+                      }`}
                   >
                     {item.title}
                   </button>
@@ -447,20 +541,19 @@ export default function Lesson() {
                 {chunks.map((chunk, idx) => (
                   <button
                     key={chunk.id || idx}
-                    onClick={() => { 
-                      setSelectedChunk(chunk); 
-                      setGenerateError(null); 
+                    onClick={() => {
+                      navigate(`/lesson/${id}/${chunk.id}`);
                       setMobileSidebarOpen(false);
                     }}
                     className={`w-full text-left p-4 rounded-xl transition-all duration-200 border ${selectedChunk?.id === chunk.id
-                        ? 'bg-orange-50 border-orange-200'
-                        : 'bg-white border-transparent hover:bg-slate-50'
+                      ? 'bg-orange-50 border-orange-200 shadow-sm'
+                      : 'bg-white border-transparent hover:bg-slate-50'
                       }`}
                   >
                     <div className="flex items-start gap-3">
                       <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black flex-shrink-0 border ${selectedChunk?.id === chunk.id
-                          ? 'bg-orange-500 border-orange-400 text-white'
-                          : 'bg-slate-100 border-slate-200 text-slate-400'
+                        ? 'bg-orange-500 border-orange-400 text-white'
+                        : 'bg-slate-100 border-slate-200 text-slate-400'
                         }`}>
                         {idx + 1}
                       </span>
@@ -475,6 +568,28 @@ export default function Lesson() {
                     </div>
                   </button>
                 ))}
+
+                {/* Comprehensive Quiz Option */}
+                {chunks.length > 1 && (
+                  <button
+                    onClick={() => {
+                      navigate(`/quiz/${id}`);
+                      setMobileSidebarOpen(false);
+                    }}
+                    className="w-full text-left p-4 rounded-xl border border-dashed border-emerald-200 bg-emerald-50/30 hover:bg-emerald-50 transition-all duration-200 group mt-4 mb-2"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <Trophy className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-emerald-700 font-extrabold text-[10px] uppercase tracking-widest leading-none mb-1">Thi tổng hợp</p>
+                        <p className="text-emerald-600/70 text-[9px] font-bold uppercase tracking-wider">Tất cả các phần</p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 ml-auto text-emerald-400 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </button>
+                )}
               </div>
 
               {/* Bottom stats */}
@@ -498,6 +613,39 @@ export default function Lesson() {
             ref={contentRef}
             className="flex-1 overflow-y-auto custom-scrollbar relative z-10 p-4 sm:p-8 lg:p-12 xl:p-16"
           >
+            {/* Bulk Processing Progress Banner */}
+            {isBulkProcessing && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="max-w-3xl mx-auto mb-8 p-4 bg-slate-900 rounded-2xl border border-slate-800 shadow-xl overflow-hidden relative"
+              >
+                <div className="flex items-center justify-between mb-3 relative z-10">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center animate-pulse">
+                      <GraduationCap className="w-4.5 h-4.5 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="text-white font-black text-[10px] uppercase tracking-widest leading-none mb-1">Đang biên soạn tự động</h4>
+                      <p className="text-slate-400 text-[9px] font-bold uppercase tracking-wider leading-none">Vui lòng chờ Roboki chuẩn bị giáo trình cho bạn</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-orange-500 font-black text-sm tracking-tighter">{bulkProgress.current}/{bulkProgress.total}</span>
+                    <span className="text-slate-500 text-[10px] ml-1 font-bold uppercase tracking-widest">Phần</span>
+                  </div>
+                </div>
+                <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                  <motion.div
+                    className="h-full bg-orange-500"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${(bulkProgress.current / bulkProgress.total) * 100}%` }}
+                  />
+                </div>
+                {/* Decoration */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 blur-[40px] rounded-full -mr-10 -mt-10" />
+              </motion.div>
+            )}
             <AnimatePresence mode="wait">
               {isGenerating ? (
                 /* --- Generating State --- */
@@ -566,7 +714,7 @@ export default function Lesson() {
                   {/* Header Decoration */}
                   <div className="mb-10">
                     <div className="flex flex-col gap-2">
-                       <h2 className="text-3xl lg:text-4xl font-black text-slate-900 leading-tight tracking-tight">
+                      <h2 className="text-3xl lg:text-4xl font-black text-slate-900 leading-tight tracking-tight">
                         {activeSection?.title || generatedLesson.title}
                       </h2>
                     </div>
@@ -596,9 +744,8 @@ export default function Lesson() {
                         setActiveSectionIndex(prev => Math.max(0, prev - 1));
                         contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
                       }}
-                      className={`flex-1 w-full sm:max-w-xs py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
-                        activeSectionIndex === 0 ? 'bg-slate-50 text-slate-300 cursor-not-allowed opacity-50' : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 shadow-sm'
-                      }`}
+                      className={`flex-1 w-full sm:max-w-xs py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${activeSectionIndex === 0 ? 'bg-slate-50 text-slate-300 cursor-not-allowed opacity-50' : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 shadow-sm'
+                        }`}
                     >
                       <ArrowLeft className="w-4 h-4" /> Bài trước
                     </button>
@@ -615,10 +762,10 @@ export default function Lesson() {
                       </button>
                     ) : (
                       <button
-                         onClick={() => navigate(`/quiz/${doc.id}`)}
-                         className="flex-[2] w-full py-4 rounded-xl font-black flex items-center justify-center gap-2 bg-slate-900 text-white shadow-sm hover:bg-slate-800 transition-all uppercase tracking-widest text-sm"
+                        onClick={() => navigate(`/quiz/${doc.id}`)}
+                        className="flex-[2] w-full py-4 rounded-xl font-black flex items-center justify-center gap-2 bg-emerald-600 text-white shadow-sm hover:bg-emerald-500 transition-all uppercase tracking-widest text-sm"
                       >
-                        Bắt đầu kiểm tra <GraduationCap className="w-4 h-4" />
+                         Bài thi tổng hợp <Trophy className="w-4 h-4 ml-1" />
                       </button>
                     )}
                   </div>

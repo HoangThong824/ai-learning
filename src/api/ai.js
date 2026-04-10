@@ -67,27 +67,26 @@ const callAnthropic = async (systemMessage, userMessage, apiKey) => {
 // --- Exported lesson / quiz helpers ---
 
 export const generateLessonOutline = async (textChunk) => {
-  const systemPrompt = `Bạn là một giáo sư đại học và l một siêu chuyên gia trong việc phân tích chuyên môn.
-Nhiệm vụ của bạn là biến nội dung được cung cấp thành một **Giáo trình học thuật siêu chi tiết**. Các "Bài học con (Sub-lessons)" cần có độ dài cực lớn, bao phủ mọi khía cạnh, chuyên sâu và giải thích cực kỳ cặn kẽ. Tránh viết tóm tắt! Hãy mổ xẻ nội dung ở mức độ chuyên gia thực thụ.
+  const systemPrompt = `Bạn là một chuyên gia thiết kế bài giảng hiện đại, bậc thầy về phương pháp Micro-learning.
+Nhiệm vụ của bạn là biến nội dung được cung cấp thành một bài học **sinh động, cô đọng và đi thẳng vào trọng tâm**.
 
-Cấu trúc chuẩn của bài học:
-1. # [Tiêu đề tổng quát của nội dung này]
-2. ## Tổng quan chuyên đề: (Phân tích toàn diện và khái quát học thuật sâu sắc về những gì sẽ được học)
-3. ## Lộ trình làm chủ kiến thức: (Danh sách các bài học con siêu chi tiết bên dưới)
-4. ## Các bài học con (Sub-lessons):
-   Đây là phần QUAN TRỌNG NHẤT. Hãy viết mỗi bài học con THẬT DÀI (ít nhất 500-1000 từ mỗi phần) và cực kỳ sắc bén theo cấu trúc:
-   ### [Tên bài học con]
-   - **Bối cảnh & Khái niệm cốt lõi:** (Giải thích cực kỳ sâu, định nghĩa rõ ràng, nguồn gốc vấn đề).
-   - **Phân tích chuyên sâu:** (Mổ xẻ chi tiết từng khía cạnh, nguyên lý hoạt động, tại sao lại như vậy).
-   - **Ví dụ thực tiễn & Case Study:** (Cung cấp các ví dụ rất thực tế, có số liệu hoặc kịch bản rõ ràng để chứng minh).
-   - **Mở rộng, Nâng cao & Phản biện (Critical Thinking):** (Kết nối với kiến thức nâng cao, góc nhìn phản biện từ chuyên gia, các điểm tối, giới hạn hoặc ứng dụng tương lai).
+Cấu trúc yêu cầu:
+1. # [Tiêu đề hấp dẫn, ngắn gọn]
+2. ## 🎯 Trọng tâm kiến thức: (Danh sách 3-5 gạch đầu dòng những điểm quan trọng nhất)
+3. ## 💡 Nội dung chi tiết:
+   Chia nhỏ thành các phần ### [Tên phần]. Trong mỗi phần, hãy:
+   - Sử dụng bảng (table) hoặc danh sách nếu phù hợp để tối ưu hóa việc đọc.
+   - **Tóm lược:** Giải thích ngắn gọn concept trong 2-3 câu.
+   - **Ví dụ minh họa 📸:** Một ví dụ thực tế hoặc kịch bản gần gũi để làm rõ concept.
+   - **Ghi nhớ (Takeaway):** Một câu chốt hạ đắt giá cho phần này.
 
-Yêu cầu BẮT BUỘC: 
-- Trình bày chuyên nghiệp bằng Markdown. 
-- Viết siêu dài, nội dung mang tính hàn lâm nhưng dễ hiểu, như một cuốn Bách khoa toàn thư. Tối đa hóa lượng kiến thức được xuất ra.
+Yêu cầu BẮT BUỘC:
+- Trình bày chuyên nghiệp bằng Markdown, sử dụng emojis hợp lý để tăng tính sinh động.
+- Văn phong hiện đại, lôi cuốn, dễ hiểu (không hàn lâm quá mức).
+- Ưu tiên sự cô đọng: Lược bỏ các chi tiết rườm rà, tập trung vào ứng dụng thực tiễn.
 - Trả lời bằng tiếng Việt.`;
 
-  const userPrompt = `Dựa trên nội dung gốc sau đây, hãy xây dựng một giáo trình học thuật hoàn chỉnh gồm nhiều bài học con SIÊU CHI TIẾT, chuyên sâu. Hãy diễn giải, mở rộng mọi ý tưởng từ văn bản tới mức tối đa, viết dài nhất có thể:\n\n${textChunk}`;
+  const userPrompt = `Dựa trên nội dung sau đây, hãy biên soạn một bài học theo phong cách Micro-learning sinh động, cô đọng. Hãy tập trung vào các ví dụ thực tế và lược bỏ các phần lý thuyết không cần thiết:\n\n${textChunk}`;
 
   const response = await callLLM(systemPrompt, userPrompt);
 

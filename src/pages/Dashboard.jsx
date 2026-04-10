@@ -151,7 +151,17 @@ export default function Dashboard() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.04 }}
                     className="flex items-center gap-4 p-4 bg-white rounded-xl border border-slate-100 hover:border-slate-200 hover:shadow-sm transition-all cursor-pointer group"
-                    onClick={() => navigate(act.type === 'lesson' ? `/lesson/${act.documentId}` : `/quiz/${act.documentId}`)}
+                    onClick={() => {
+                      const path = act.type === 'lesson' ? 'lesson' : 'quiz';
+                      const chunkSuffix = act.chunkId ? `/${act.chunkId}` : '';
+                      const querySuffix = (act.type === 'quiz' && act.chunkId) ? `?chunkId=${act.chunkId}` : '';
+                      
+                      if (act.type === 'lesson') {
+                        navigate(`/lesson/${act.documentId}${chunkSuffix}`);
+                      } else {
+                        navigate(`/quiz/${act.documentId}${querySuffix}`);
+                      }
+                    }}
                   >
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${act.type === 'lesson' ? 'bg-violet-50 text-violet-500' : 'bg-emerald-50 text-emerald-500'}`}>
                       {act.type === 'lesson' ? <BookOpen className="w-4.5 h-4.5" /> : <Target className="w-4.5 h-4.5" />}

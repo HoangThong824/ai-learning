@@ -123,16 +123,16 @@ export default function TutorChat({ docId, context }) {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
-            className="fixed bottom-24 right-0 z-50 flex items-center sm:bottom-28 lg:bottom-10"
+            className="fixed bottom-24 right-4 sm:right-0 z-50 flex items-center sm:bottom-28 lg:bottom-10"
           >
             <button
               onClick={() => setIsOpen(true)}
-              className="flex items-center gap-3 pl-5 pr-7 py-4 bg-slate-900 text-white rounded-l-2xl shadow-sm border border-slate-800 transition-all hover:bg-slate-800 active:scale-95 group"
+              className="flex items-center gap-3 p-3 sm:pl-5 sm:pr-7 sm:py-4 bg-slate-900 text-white rounded-full sm:rounded-l-2xl sm:rounded-r-none shadow-md border border-slate-800 transition-all hover:bg-slate-800 active:scale-95 group"
             >
-              <div className="relative">
+              <div className="relative flex items-center justify-center w-8 h-8 sm:w-auto sm:h-auto">
                 <img src={logoSvg} alt="Logo" className="w-6 h-6 object-contain" />
               </div>
-              <div className="flex flex-col items-start leading-tight">
+              <div className="hidden sm:flex flex-col items-start leading-tight ml-1 sm:ml-0">
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-50">Gia sư trực tuyến</span>
                 <span className="text-sm font-black tracking-tight uppercase">Hỏi Roboki</span>
               </div>
@@ -157,8 +157,8 @@ export default function TutorChat({ docId, context }) {
             {/* Header */}
             <div className="px-5 py-5 border-b border-slate-200 flex items-center justify-between bg-white cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center border border-orange-100">
-                  <img src={logoSvg} alt="Roboki Logo" className="w-6 h-6 object-contain" />
+                <div className="w-10 h-10 flex items-center justify-center shrink-0">
+                  <img src={logoSvg} alt="Roboki Logo" className="w-8 h-8 object-contain" />
                 </div>
                 <div>
                   <h3 className="font-black text-slate-900 text-sm uppercase tracking-tight">Roboki Gia Sư</h3>
