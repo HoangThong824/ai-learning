@@ -2,22 +2,21 @@ import { getSettings } from '../persistence/storage';
 
 // Base AI call — dispatches to OpenAI or Anthropic depending on user settings
 const callLLM = async (systemMessage, userMessage) => {
-  const { apiKey, aiProvider } = getSettings();
-  if (!apiKey) throw new Error('Vui lòng nhập API Key trong phần Cài đặt (hoặc cấu hình VITE_DEFAULT_API_KEY).');
-
+  const { aiProvider } = getSettings();
+  // apiKey is no longer required on client side as it is injected by Nginx proxy
   if (aiProvider === 'anthropic') {
-    return callAnthropic(systemMessage, userMessage, apiKey);
+    return callAnthropic(systemMessage, userMessage);
   } else {
-    return callOpenAI(systemMessage, userMessage, apiKey);
+    return callOpenAI(systemMessage, userMessage);
   }
 };
 
-const callOpenAI = async (systemMessage, userMessage, apiKey) => {
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+const callOpenAI = async (systemMessage, userMessage) => {
+  const response = await fetch('/api/openai/chat', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
+      // Authorization header is injected by Nginx
     },
     body: JSON.stringify({
       model: 'gpt-4o-mini',
@@ -38,12 +37,12 @@ const callOpenAI = async (systemMessage, userMessage, apiKey) => {
   return data.choices[0].message.content;
 };
 
-const callAnthropic = async (systemMessage, userMessage, apiKey) => {
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
+const callAnthropic = async (systemMessage, userMessage) => {
+  const response = await fetch('/api/anthropic/messages', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': apiKey,
+      // x-api-key is injected by Nginx
       'anthropic-version': '2023-06-01',
       'anthropic-dangerous-direct-browser-access': 'true',
     },
@@ -199,16 +198,15 @@ ${!isConfirmed && currentQuestion ? `Học viên ĐANG xem câu hỏi này và C
 Nhiệm vụ của bạn: Trả lời câu hỏi của học viên (trong khoảng 100-300 từ). 
 QUAN TRỌNG: Bạn phải luôn đối chiếu với "DỮ LIỆU BÀI HỌC" và cá nhân hóa phản hồi dựa trên "LỖI SAI TRONG BÀI THI HIỆN TẠI", "LỊCH SỬ LỖI SAI" cũng như "CÂU HỎI ĐANG HIỂN THỊ" (nếu có).`;
 
-  const { apiKey, aiProvider } = getSettings();
-  if (!apiKey) throw new Error('Vui lòng nhập API Key trong phần Cài đặt.');
+  const { aiProvider } = getSettings();
 
   // Depending on provider, history needs to be formatted
   if (aiProvider === 'anthropic') {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      const response = await fetch('/api/anthropic/messages', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': apiKey,
+          // x-api-key is injected by Nginx
           'anthropic-version': '2023-06-01',
           'anthropic-dangerous-direct-browser-access': 'true',
         },
@@ -228,11 +226,11 @@ QUAN TRỌNG: Bạn phải luôn đối chiếu với "DỮ LIỆU BÀI HỌC" v
       const data = await response.json();
       return data.content[0].text;
   } else {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      const response = await fetch('/api/openai/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
+          // Authorization header is injected by Nginx
         },
         body: JSON.stringify({
           model: 'gpt-4o-mini',

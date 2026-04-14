@@ -57,52 +57,7 @@ export default function Settings() {
       </header>
 
       <div className="space-y-5 pb-10">
-        {/* AI Config */}
-        <section className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
-          <div className="px-6 py-5 border-b border-slate-50 flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-              <Key className="w-4 h-4 text-blue-500" />
-            </div>
-            <div>
-              <h2 className="text-sm font-semibold text-slate-800">Cấu hình AI</h2>
-              <p className="text-xs text-slate-400">Kết nối với OpenAI hoặc Anthropic Claude</p>
-            </div>
-          </div>
-
-          <div className="px-6 py-5 space-y-5">
-            {/* Provider select */}
-            <div>
-              <label className="block text-xs font-medium text-slate-600 mb-2">Nhà cung cấp</label>
-              <div className="relative">
-                <select
-                  value={aiProvider}
-                  onChange={(e) => setAiProvider(e.target.value)}
-                  className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 focus:outline-none focus:border-slate-300 focus:bg-white transition-colors cursor-pointer"
-                >
-                  <option value="openai">OpenAI — GPT-4o mini</option>
-                  <option value="anthropic">Anthropic — Claude 3.5 Sonnet</option>
-                </select>
-                <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-              </div>
-            </div>
-
-            {/* API Key */}
-            <div>
-              <label className="block text-xs font-medium text-slate-600 mb-2">API Key</label>
-              <input
-                type="password"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder={aiProvider === 'anthropic' ? 'sk-ant-...' : 'sk-...'}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-300 focus:bg-white transition-colors font-mono"
-              />
-              <p className="text-xs text-slate-400 mt-2 flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-                Key được lưu cục bộ trong trình duyệt, không gửi đến server.
-              </p>
-            </div>
-          </div>
-        </section>
+        {/* AI Config section has been moved to server-side proxy for security */}
 
         {/* Reminder config */}
         <section className="bg-white rounded-2xl border border-slate-100 overflow-hidden">

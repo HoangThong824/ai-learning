@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    container_name: ai-assistant
+    restart: unless-stopped
+    networks:
+      - tunnel-net
+
+  cf-tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: cf-tunnel
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${CF_TUNNEL_TOKEN:-your-tunnel-token-here}
+    networks:
+      - tunnel-net
+
+networks:
+  tunnel-net:
+    driver: bridge
