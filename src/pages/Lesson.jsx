@@ -338,7 +338,7 @@ export default function Lesson() {
         console.error(`[Bulk Gen] Error processing chunk ${chunk.id}:`, err);
       }
 
-      // Small delay to prevent API overloading
+      //delay to prevent API overloading
       await new Promise(r => setTimeout(r, 500));
     }
 
@@ -765,7 +765,7 @@ export default function Lesson() {
                         onClick={() => navigate(`/quiz/${doc.id}`)}
                         className="flex-[2] w-full py-4 rounded-xl font-black flex items-center justify-center gap-2 bg-emerald-600 text-white shadow-sm hover:bg-emerald-500 transition-all uppercase tracking-widest text-sm"
                       >
-                         Bài thi tổng hợp <Trophy className="w-4 h-4 ml-1" />
+                        Bài thi tổng hợp <Trophy className="w-4 h-4 ml-1" />
                       </button>
                     )}
                   </div>
