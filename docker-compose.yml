@@ -2,21 +2,44 @@ version: "3.8"
 
 services:
   app:
-    build: .
+    image: thongnguyen824/ai-learning:latest
     container_name: ai-assistant
+    ports:
+      - "8080:80"
     restart: unless-stopped
     networks:
       - tunnel-net
+
+    #
+    environment:
+      - OPENAI_SECRET_KEY=${OPENAI_SECRET_KEY}
+
+    #
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
 
   cf-tunnel:
     image: cloudflare/cloudflared:latest
     container_name: cf-tunnel
     restart: unless-stopped
-    command: tunnel --no-autoupdate run
-    environment:
-      - TUNNEL_TOKEN=${CF_TUNNEL_TOKEN:-your-tunnel-token-here}
+    command: tunnel run --token ${CF_TUNNEL_TOKEN}
+    env_file:
+      - .env
     networks:
       - tunnel-net
+
+  #
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: watchtower
+    restart: always
+    command: --interval 60 --cleanup --api-version 1.44
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_LABEL_ENABLE=true
+      - WATCHTOWER_POLL_INTERVAL=60
 
 networks:
   tunnel-net:

@@ -9,7 +9,7 @@ server {
     }
 
     location /api/ {
-        proxy_pass https://api.openai.com/; 
+        proxy_pass https://api.openai.com/;
         proxy_set_header Authorization "Bearer ${OPENAI_SECRET_KEY}";
         proxy_set_header Content-Type "application/json";
         proxy_ssl_server_name on;
